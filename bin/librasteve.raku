@@ -72,9 +72,7 @@ my $routes = route {
 	}
 
 	#iamerejh - sort out id
-	add-component Table;
-	add-component Row;
-	add-component Col;
+	add-components Table, Row, Col;
 }
 
 
