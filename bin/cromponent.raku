@@ -80,7 +80,7 @@ my $routes = route {
 	add-component
 		Todo,
 		:load( -> UInt() $id { @todos.first: { .id == $id } }),
-		:create(-> %data { @todos.push: my $n = Todo.new: |%data; $n }),
+		:create(-> *%data { @todos.push: my $n = Todo.new: |%data; $n }),
 		:delete( -> UInt() $id { @todos .= grep: { .id != $id } }),
 	;
 }
