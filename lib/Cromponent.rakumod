@@ -25,17 +25,18 @@ sub add-component(
 	:&create is copy,
 	:&update is copy,
 	:$url-part = $component.^name.lc,
+	:$macro = False,
 ) is export {
-	%components.push: $component.^name => %(:&load, :&delete, :$component);
-
-	post -> Str $ where $url-part {
-		request-body -> $data {
-			my $new = create |$data.pairs.Map;
-			redirect "/{$url-part}/{ $new.id }", :see-other
-		}
-	}
+	%components.push: $component.^name => %(:&load, :&delete, :$component, :tag-type($macro ?? 'macro' !! 'sub'));
 
 	with &load {
+		post -> Str $ where $url-part {
+			request-body -> $data {
+				my $new = create |$data.pairs.Map;
+				redirect "/{$url-part}/{ $new.id }", :see-other
+			}
+		} with &create;
+
 		get -> Str $ where $url-part, $id {
 			my $tag = $component.^name;
 			my $comp = load $id;
@@ -74,13 +75,37 @@ sub add-component(
 	}
 }
 
-sub template-with-components($template, $data!) is export {
+sub template-with-components($template, $data?) is export {
 	my $header = %components.values.map({
+		my $sig  = .<component>.^attributes.grep(*.has_accessor).map({ ":\${ .name.substr(2) }" }).join: ", ";
 		my $name = .<component>.^name;
 		my $t    = .<component>.RENDER;
-		"<:sub {$name}(\$_)> $t </:>"
+		my $tag  = .<tag-type> // "sub";
+		my $call = $tag eq "sub" ?? "&" !! "|";
+		qq:to/END/
+		<:{ $tag } {$name}(\$_ = \$cromponents.{$name})>
+		$t.indent(4)
+		</:{ $tag }>
+		<:{ $tag } {$name}-new({ $sig })>
+			<{ $call }{ $name }(\$cromponents.{ $name }.new({ $sig }))> { " <:body> </{ $call }{ $name }> " if $tag eq "macro" }
+		</:{ $tag }>
+		END
 	}).join: "\n";
-	template-inline "$header \n\n\n$template", $data;
+	my $wrapped-data = {
+		:$data,
+		:cromponents(%components.kv.map(-> $key, % (:$component, |){ $key => $component }).Map)
+	};
+	my $wrapped-template = qq:to/END/;
+		<:sub cromponent-wrapper\(\$cromponents, \$_)>
+		$header.indent(4)
+		$template.indent(4)
+		</:sub>
+		<&cromponent-wrapper\(.cromponents, .data)>
+		END
+	#say $wrapped-template;
+	#say $wrapped-data;
+
+	template-inline $wrapped-template, $wrapped-data;
 }
 
 
