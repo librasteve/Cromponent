@@ -22,6 +22,15 @@ my $topic;
 
 }
 
+#| Notes:
+#| - the $topic hash is loaded with needed Component objects
+#| - $topic<mytable> = MyTable.new: $[[1, 2], [3, 4]]; and so on
+#| - just use the $topic variable as the 2nd argument to
+#|     template-with-components call
+#|
+#| - itemize list args eg $[5,6] to avoid them being slurped
+#| - use semi-colon separator also to avoid slurping all subs
+
 
 use Cro::WebApp::Template;
 use Cro::HTTP::Router;
