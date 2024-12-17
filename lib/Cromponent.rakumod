@@ -113,23 +113,34 @@ sub template-with-components($template, $data?) is export {
 
 =head1 NAME
 
-Cromponent - blah blah blah
+Cromponent - A way create web components with cro templates
 
 =head1 SYNOPSIS
 
 =begin code :lang<raku>
 
 use Cromponent;
+class AComponent {
+	has $.data;
+
+	method RENDER {
+		Q:to//END
+		<h1><.data></h1>
+		END
+	}
+}
+
+# for how to use that, please follow the examples on the bin/ dir
 
 =end code
 
 =head1 DESCRIPTION
 
-Cromponent is ...
+Cromponent is a way create web components with cro templates
 
 =head1 AUTHOR
 
-Fernando Corrêa de Oliveira <fernando.correa@humanstate.com>
+Fernando Corrêa de Oliveira <fco@cpan.com>
 
 =head1 COPYRIGHT AND LICENSE
 

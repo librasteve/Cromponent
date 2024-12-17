@@ -8,7 +8,7 @@
   "depends": [
     "Cro::WebApp::Template"
   ],
-  "description": "blah blah blah",
+  "description": "A way create web components with cro templates",
   "license": "Artistic-2.0",
   "name": "Cromponent",
   "perl": "6.d",
@@ -17,7 +17,7 @@
   },
   "resources": [
   ],
-  "source-url": "",
+  "source-url": "https://github.com/FCO/Cromponent.git",
   "tags": [
   ],
   "test-depends": [
