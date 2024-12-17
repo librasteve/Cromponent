@@ -1,24 +1,37 @@
+[![Actions Status](https://github.com/FCO/Cromponent/actions/workflows/test.yml/badge.svg)](https://github.com/FCO/Cromponent/actions)
+
 NAME
 ====
 
-Cromponent - blah blah blah
+Cromponent - A way create web components with cro templates
 
 SYNOPSIS
 ========
 
 ```raku
 use Cromponent;
+class AComponent {
+	has $.data;
+
+	method RENDER {
+		Q:to//END
+		<h1><.data></h1>
+		END
+	}
+}
+
+# for how to use that, please follow the examples on the bin/ dir
 ```
 
 DESCRIPTION
 ===========
 
-Cromponent is ...
+Cromponent is a way create web components with cro templates
 
 AUTHOR
 ======
 
-Fernando Corrêa de Oliveira <fernando.correa@humanstate.com>
+Fernando Corrêa de Oliveira <fco@cpan.com>
 
 COPYRIGHT AND LICENSE
 =====================
