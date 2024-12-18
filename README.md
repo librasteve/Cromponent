@@ -14,7 +14,7 @@ class AComponent {
 	has $.data;
 
 	method RENDER {
-		Q:to//END
+		Q:to/END/
 		<h1><.data></h1>
 		END
 	}
