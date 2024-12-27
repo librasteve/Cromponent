@@ -57,6 +57,7 @@ class Table {
 my $routes = route {
 
 	my $table = Table.new: [[1,2],[3,4]];
+	add-components Table, Row, Col;
 
 	get  -> {
 		template-with-components Q:to/END/, { :$table };
@@ -70,8 +71,6 @@ my $routes = route {
 		</html>
 		END
 	}
-
-	add-components Table, Row, Col;
 }
 
 

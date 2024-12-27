@@ -2,14 +2,24 @@ unit class Cromponent;
 use Cro::WebApp::Template;
 use Cro::HTTP::Router;
 
-my %components;
-
-role Accessible {
-	has Bool $.accessible = True;
+class CromponentHandler does Callable {
+	has &.handler;
+	has $.method;
+	has $.route-set;
+	method signature { &!handler.signature }
+	method CALL-ME(|c) {
+		my $*CRO-ROUTE-SET := $!route-set;
+		&!handler.(|c)
+	}
 }
+#my %components;
+role WithCromponents {
+	has %.cromponents is rw;
 
-multi trait_mod:<is>(Method $m, :$accessible!) is export {
-	$m does Accessible
+	method add-handler($method, &handler) {
+		my $route-set := $*CRO-ROUTE-SET;
+		callwith $method, CromponentHandler.new: :&handler, :$method, :$route-set;
+	}
 }
 
 multi add-components(*@components) is export {
@@ -27,13 +37,18 @@ sub add-component(
 	:$url-part = $component.^name.lc,
 	:$macro = False,
 ) is export {
-	%components.push: $component.^name => %(:&load, :&delete, :$component, :tag-type($macro ?? 'macro' !! 'sub'));
+	my $route-set := $*CRO-ROUTE-SET;
+	$ = $route-set does WithCromponents unless $route-set ~~ WithCromponents;
+
+	my %cromponents := $route-set.cromponents;
+
+	%cromponents.push: $component.^name => %(:&load, :&delete, :$component, :tag-type($macro ?? 'macro' !! 'sub'));
 
 	with &load {
 		post -> Str $ where $url-part {
 			request-body -> $data {
 				my $new = create |$data.pairs.Map;
-				redirect "/{$url-part}/{ $new.id }", :see-other
+				redirect "$url-part/{ $new.id }", :see-other
 			}
 		} with &create;
 
@@ -62,13 +77,13 @@ sub add-component(
 				put -> Str $ where $url-part, $id, Str $name {
 					request-body -> $data {
 						load($id)."$name"(|$data.pairs.Map);
-						redirect "/{ $url-part }/{ $id }", :see-other
+						redirect "../{ $id }", :see-other
 					}
 				}
 			} else {
 				get -> Str $ where $url-part, $id, Str $name {
 					load($id)."$name"();
-					redirect "/{ $url-part }/{ $id }", :see-other
+					redirect "../{ $id }", :see-other
 				}
 			}
 		}
@@ -76,7 +91,10 @@ sub add-component(
 }
 
 sub template-with-components($template, $data?) is export {
-	my $header = %components.values.map({
+	my $route-set := $*CRO-ROUTE-SET;
+	my %cromponents := $route-set.cromponents;
+
+	my $header = %cromponents.values.map({
 		my $sig  = .<component>.^attributes.grep(*.has_accessor).map({ ":\${ .name.substr(2) }" }).join: ", ";
 		my $name = .<component>.^name;
 		my $t    = .<component>.RENDER;
@@ -93,7 +111,7 @@ sub template-with-components($template, $data?) is export {
 	}).join: "\n";
 	my $wrapped-data = {
 		:$data,
-		:cromponents(%components.kv.map(-> $key, % (:$component, |){ $key => $component }).Map)
+		:cromponents(%cromponents.kv.map(-> $key, % (:$component, |){ $key => $component }).Map)
 	};
 	my $wrapped-template = qq:to/END/;
 		<:sub cromponent-wrapper\(\$cromponents, \$_)>

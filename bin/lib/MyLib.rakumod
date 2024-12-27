@@ -2,7 +2,7 @@ use Cromponent;
 
 my @manifest = <MyTable Row Cell>;
 
-role Cell is export {
+role Cell {
 	has $.data is required;
 	
 	multi method new($data) {
@@ -16,7 +16,7 @@ role Cell is export {
 	}
 }
 
-role Row is export {
+role Row {
 	has Cell() @.cells is required;
 	
 	multi method new(@cells) {
@@ -34,7 +34,7 @@ role Row is export {
 	}
 }
 
-role MyTable is export {
+role MyTable {
 	has Row() @.rows is required;
 	
 	multi method new(@rows) {
