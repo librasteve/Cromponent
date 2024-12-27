@@ -161,8 +161,15 @@ my $routes = route {
 	my $themed  = $table.clone: :head-theme<light>;
 	my $striped = $table.clone: :classes<striped>;
 
+	my $tables = {
+		:tables[
+			{ :tags<a e i o u>, :table($table),  },
+			{ :tags<a e i o u>, :table($themed), },
+			{ :tags<a e i o u>, :table($striped),},
+		],
+	};
 	get  -> {
-		template-with-components Q:to/END/, { :$table, :$themed, :$striped };
+		template-with-components Q:to/END/, $tables;
 		<html>
 			<head>
 				<link
@@ -171,9 +178,13 @@ my $routes = route {
 				>
 			</head>
 			<body>
-				<&Table(.table)>
-				<&Table(.themed)>
-				<&Table(.striped)>
+				<@tables>
+					<ul>
+						<@tags><li><$_></li></@>
+					</ul>
+					<&Table(.table)>
+					<:separator><br><hr><br></:>
+				</@>
 			</body>
 		</html>
 		END
