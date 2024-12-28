@@ -130,7 +130,42 @@ sub compile-cromponent($cromponent) {
 		$code,
 		actions => Cro::WebApp::Template::ASTBuilder
 	).ast;
-	$ast.compile
+
+	CATCH {
+		default {
+			.&dd;
+			.die
+		}
+	}
+	# If letting this commented, it gives this error when running: raku -Ilib -Ibin/lib -e 'use todo-routes'
+	#
+	# ❯ raku -Ilib -Ibin/lib -e 'use todo-routes'
+	#===SORRY!=== Error while compiling -e
+	#X::Comp::BeginTime.new(use-case => "evaluating a BEGIN", exception => X::Comp::AdHoc.new(pos => Any, filename => Any, line => Any, directive-filename => Any, column => Any, modules => [], is-compile-time => Any, pre => Any, post => Any, highexpect => [], payload => "lang-call cannot invoke object of type 'VMNull' belonging to no language"), pos => Any, filename => "/Users/fernando/Cromponent/EVAL_86", line => 1, directive-filename => Any, column => Any, modules => [], is-compile-time => Bool::True, pre => Any, post => Any, highexpect => [])
+	#===SORRY!=== Error while compiling /Users/fernando/Cromponent/EVAL_86
+	#An exception X::Comp::AdHoc occurred while evaluating a BEGIN:
+	#lang-call cannot invoke object of type 'VMNull' belonging to no language
+	#at /Users/fernando/Cromponent/EVAL_86:1
+	#Exception details:
+	#  ===SORRY!=== Error while compiling
+	#  lang-call cannot invoke object of type 'VMNull' belonging to no language
+	#  at line
+	#
+	#at -e:1
+	#
+	# if you uncomment this line, it will remobe prelude from the generated code, ahd the error will be:
+	#❯ raku -Ilib -Ibin/lib -e 'use todo-routes'
+	#===SORRY!=== Error while compiling -e
+	#Missing or wrong version of dependency 'EVAL_85' (from '/Users/fernando/Cromponent/bin/lib/todo-routes.rakumod (todo-routes)')
+	#at -e:1
+	#
+	# But independently from this line, if you run: raku -Ilib -Ibin/lib -e 'use Todo'
+	# it worksw correctly
+	#
+	#$ast.children.shift; # Removes prelude from generated code
+	my $compiled = $ast.compile;
+	#dd $compiled;
+	$compiled
 }
 
 sub compile-call-cromponent($cromponent) {
@@ -197,11 +232,10 @@ sub cromponent-library($component) is export {
 	)
 }
 
-
 multi EXPORT(--> Map()) {
 	'&trait_mod:<is>' => &trait_mod:<is>,
 	'&EXPORT' => sub {
-		[|@components-sub, |@components-macro].flatmap({ |cromponent-library $_ }).Map
+		[|@components-sub, |@components-macro].map({ |cromponent-library $_ }).Map
 	},
 }
 
