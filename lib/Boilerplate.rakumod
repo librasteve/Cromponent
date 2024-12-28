@@ -1,4 +1,4 @@
-use Cromponent <export>;
+use Cromponent;
 
 unit class Boilerplate is macro;
 

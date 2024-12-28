@@ -1,0 +1,19 @@
+<:use Table>
+<html>
+	<head>
+		<link
+		  rel="stylesheet"
+		  href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"
+		>
+	</head>
+	<body>
+		<@tables>
+			<ul>
+				<@tags><li><$_></li></@>
+			</ul>
+			<&Table(.table)>
+			<:separator><br><hr><br></:>
+		</@>
+	</body>
+</html>
+

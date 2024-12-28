@@ -1,0 +1,6 @@
+<:use Start>
+<:use Header>
+<|Start>
+	<|Header(:num(2))>Test</|>
+</|>
+

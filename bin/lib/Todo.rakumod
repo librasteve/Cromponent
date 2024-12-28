@@ -1,4 +1,4 @@
-use Cromponent <export>;
+use Cromponent;
 
 my UInt $next = 1;
 class Todo is cromponent {
