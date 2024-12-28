@@ -5,7 +5,6 @@ use lib "bin/lib";
 use Cro::HTTP::Router;
 use Cro::HTTP::Server;
 use Cro::WebApp::Template;
-use Cromponent;
 use Todo;
 
 my $routes = route {
