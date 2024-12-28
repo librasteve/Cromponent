@@ -12,6 +12,7 @@ use MyLib;
 my $routes = route {
 
 	my $table = MyTable.new: [[1,2],[3,4]];
+	add-components MyTable, Row, Cell;
 
 	get  -> {
 		template-with-components Q:to/END/, { :$table };
@@ -25,8 +26,6 @@ my $routes = route {
 		</html>
 		END
 	}
-
-	add-components MyTable, Row, Cell;
 }
 
 

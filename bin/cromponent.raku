@@ -53,6 +53,12 @@ class Todo {
 
 my $routes = route {
 	my @todos = do for <blablabla blebleble> -> $data { Todo.new: :$data }
+	add-component
+		Todo,
+		:load( -> UInt() $id { @todos.first: { .id == $id } }),
+		:create(-> *%data { @todos.push: my $n = Todo.new: |%data; $n }),
+		:delete( -> UInt() $id { @todos .= grep: { .id != $id } }),
+	;
 	get  -> {
 		template-with-components Q:to/END/, { :@todos };
 		<html>
@@ -77,12 +83,6 @@ my $routes = route {
 		</html>
 		END
 	}
-	add-component
-		Todo,
-		:load( -> UInt() $id { @todos.first: { .id == $id } }),
-		:create(-> *%data { @todos.push: my $n = Todo.new: |%data; $n }),
-		:delete( -> UInt() $id { @todos .= grep: { .id != $id } }),
-	;
 }
 my Cro::Service $http = Cro::HTTP::Server.new(
     http => <1.1>,

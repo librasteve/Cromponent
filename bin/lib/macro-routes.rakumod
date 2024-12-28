@@ -1,8 +1,6 @@
 #!/usr/bin/env raku
 
-use lib "lib";
 use Cro::HTTP::Router;
-use Cro::HTTP::Server;
 use Cromponent;
 
 my UInt $next = 1;
@@ -46,30 +44,17 @@ class Header {
 	}
 }
 
-my $routes = route {
-	add-component Start, :macro;
-	add-component Head;
-	add-component Header, :macro;
-	get  -> {
-		template-with-components Q:to/END/;
-		<|Start>
-			<|Header-new(:num(2))>Test</|>
-		</|>
-		END
+sub macro-routes is export {
+	route {
+		add-component Start, :macro;
+		add-component Head;
+		add-component Header, :macro;
+		get  -> {
+			template-with-components Q:to/END/;
+			<|Start>
+				<|Header-new(:num(2))>Test</|>
+			</|>
+			END
+		}
 	}
-}
-my Cro::Service $http = Cro::HTTP::Server.new(
-    http => <1.1>,
-    host => "0.0.0.0",
-    port => 3000,
-    application => $routes,
-);
-$http.start;
-say "Listening at http://0.0.0.0:3000";
-react {
-    whenever signal(SIGINT) {
-        say "Shutting down...";
-        $http.stop;
-        done;
-    }
 }
