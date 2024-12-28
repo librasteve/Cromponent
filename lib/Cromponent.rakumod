@@ -29,11 +29,11 @@ multi add-components(*@components) is export {
 }
 
 sub add-component(
-	$component is copy,
-	:&load is copy,
+	$component    is copy,
+	:&load        is copy,
 	:delete(&del) is copy,
-	:&create is copy,
-	:&update is copy,
+	:&create      is copy,
+	:&update      is copy,
 	:$url-part = $component.^name.lc,
 	:$macro = False,
 ) is export {
@@ -43,6 +43,11 @@ sub add-component(
 	my %cromponents := $route-set.cromponents;
 
 	%cromponents.push: $component.^name => %(:&load, :&delete, :$component, :tag-type($macro ?? 'macro' !! 'sub'));
+
+	&load   //= -> $id         { $component.LOAD: $id      } if $component.^can: "LOAD";
+	&create //= -> *%pars      { $component.CREATE: |%pars } if $component.^can: "CREATE";
+	&del    //= -> $id         { load($id).DELETE          } if $component.^can: "DELETE";
+	&update //= -> $id, *%pars { load($id).UPDATE: |%pars  } if $component.^can: "UPDATE";
 
 	with &load {
 		post -> Str $ where $url-part {
@@ -65,8 +70,7 @@ sub add-component(
 
 		put -> Str $ where $url-part, $id {
 			request-body -> $data {
-				my $comp = load $id;
-				update $comp, |$data.pairs.Map
+				update $id, |$data.pairs.Map
 			}
 		} with &update;
 

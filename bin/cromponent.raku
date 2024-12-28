@@ -8,9 +8,16 @@ use Cromponent;
 my UInt $next = 1;
 
 class Todo {
+	my @todos = do for <blablabla blebleble> -> $data { Todo.new: :$data }
 	has UInt $.id = $next++;
 	has Bool $.done is rw = False;
 	has Str  $.data is required;
+
+	method LOAD(UInt() $id) { @todos.first: { .id == $id } }
+	method CREATE(*%data)   { @todos.push: my $n = self.new: |%data; $n }
+	method DELETE           { @todos .= grep: { .id != $!id } }
+
+	method all { @todos }
 
 	method toggle {
 		$!done = !$!done
@@ -52,15 +59,9 @@ class Todo {
 }
 
 my $routes = route {
-	my @todos = do for <blablabla blebleble> -> $data { Todo.new: :$data }
-	add-component
-		Todo,
-		:load( -> UInt() $id { @todos.first: { .id == $id } }),
-		:create(-> *%data { @todos.push: my $n = Todo.new: |%data; $n }),
-		:delete( -> UInt() $id { @todos .= grep: { .id != $id } }),
-	;
+	add-component Todo;
 	get  -> {
-		template-with-components Q:to/END/, { :@todos };
+		template-with-components Q:to/END/, { :todos(Todo.all) };
 		<html>
 			<head>
 				<script src="https://unpkg.com/htmx.org@2.0.3" integrity="sha384-0895/pl2MU10Hqc6jd4RvrthNlDiE9U1tWmX7WRESftEDRosgxNsQG/Ze9YMRzHq" crossorigin="anonymous"></script>
