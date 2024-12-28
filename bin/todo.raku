@@ -1,6 +1,5 @@
 #!/usr/bin/env raku
 
-use lib "lib";
 use lib "bin/lib";
 use Cro::HTTP::Router;
 use Cro::HTTP::Server;
