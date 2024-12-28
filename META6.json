@@ -16,6 +16,7 @@
     "Cromponent": "lib/Cromponent.rakumod"
   },
   "resources": [
+    "resources/todo-base.crotmp"
   ],
   "source-url": "https://github.com/FCO/Cromponent.git",
   "tags": [

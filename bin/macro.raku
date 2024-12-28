@@ -7,7 +7,7 @@ use Cromponent;
 
 my UInt $next = 1;
 
-class Start {
+class Start is macro {
 	method RENDER {
 		Q:to/END/;
 		<html>
@@ -34,7 +34,7 @@ class Head {
 	}
 }
 
-class Header {
+class Header is macro {
 	has UInt $.num where {$_ <= 6} = 1;
 
 	method RENDER {
@@ -47,9 +47,9 @@ class Header {
 }
 
 my $routes = route {
-	add-component Start, :macro;
+	add-component Start;
 	add-component Head;
-	add-component Header, :macro;
+	add-component Header;
 	get  -> {
 		template-with-components Q:to/END/;
 		<|Start>

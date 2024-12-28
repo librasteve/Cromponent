@@ -1,6 +1,5 @@
-unit class Cromponent;
-use Cro::WebApp::Template;
-use Cro::HTTP::Router;
+my @components-sub;
+my @components-macro;
 
 class CromponentHandler does Callable {
 	has &.handler;
@@ -12,13 +11,37 @@ class CromponentHandler does Callable {
 		&!handler.(|c)
 	}
 }
-#my %components;
+
 role WithCromponents {
 	has %.cromponents is rw;
 
 	method add-handler($method, &handler) {
 		my $route-set := $*CRO-ROUTE-SET;
 		callwith $method, CromponentHandler.new: :&handler, :$method, :$route-set;
+	}
+}
+
+multi trait_mod:<is>(Mu:U $component, Bool :$macro!) is export {
+	$component.HOW does role IsMacro { method is-macro(|) { True } }
+	trait_mod:<is>($component, :cromponent);
+}
+
+multi trait_mod:<is>(Mu:U $component, Bool :$cromponent!) is export {
+	trait_mod:<is>($component, :cromponent{})
+}
+
+multi trait_mod:<is>(Mu:U $component, :%cromponent!) is export {
+	if %cromponent<macro> || $component.HOW.?is-macro($component) {
+		@components-macro.push: $component
+	} else {
+		@components-sub.push: $component
+	}
+	$component.HOW does role IsCromponent {
+		method add($cromponent, *%pars) {
+			
+			my %parameters := %(|%cromponent, |%pars).Map;
+			add-component $cromponent, |%parameters;
+		}
 	}
 }
 
@@ -35,8 +58,12 @@ sub add-component(
 	:&create      is copy,
 	:&update      is copy,
 	:$url-part = $component.^name.lc,
-	:$macro = False,
+	:$macro    = $component.HOW.?is-macro($component) // False,
 ) is export {
+	use Cro::HTTP::Router;
+	without $*CRO-ROUTE-SET {
+		die "Cromponents should be added from inside a `route {}` block"
+	}
 	my $route-set := $*CRO-ROUTE-SET;
 	$ = $route-set does WithCromponents unless $route-set ~~ WithCromponents;
 
@@ -94,7 +121,20 @@ sub add-component(
 	}
 }
 
+sub cromponent-to-tmpl($component, $tag = "sub") {
+	my $sig  = $component.^attributes.grep(*.has_accessor).map({ ":\${ .name.substr(2) }" }).join: ", ";
+	my $name = $component.^name;
+	my $t    = $component.RENDER;
+	my $call = $tag eq "sub" ?? "&" !! "|";
+	qq:to/END/
+	<:{ $tag } {$name}(\$_)>
+	$t.indent(4)
+	</:{ $tag }>
+	END
+}
+
 sub template-with-components($template, $data?) is export {
+	use Cro::WebApp::Template;
 	my $route-set := $*CRO-ROUTE-SET;
 	my %cromponents := $route-set.cromponents;
 
@@ -128,6 +168,50 @@ sub template-with-components($template, $data?) is export {
 	#say $wrapped-data;
 
 	template-inline $wrapped-template, $wrapped-data;
+}
+
+sub compile-cromponent($cromponent) {
+	use Cro::WebApp::Template::Repository;
+	use Cro::WebApp::Template::Parser;
+	use Cro::WebApp::Template::ASTBuilder;
+
+	my $*TEMPLATE-FILE = $cromponent.^name.IO;
+	my $code = $cromponent.&cromponent-to-tmpl: |("macro" if $cromponent.HOW.?is-macro($cromponent));
+
+	my $*TEMPLATE-REPOSITORY = get-template-repository;
+	my $ast = Cro::WebApp::Template::Parser.parse(
+		$code,
+		actions => Cro::WebApp::Template::ASTBuilder
+	).ast;
+	$ast.compile
+}
+
+multi EXPORT(+@add --> Map()) {
+	'&trait_mod:<is>' => &trait_mod:<is>,
+	'&EXPORT' => sub (--> Map()) {
+		|@components-sub.map(-> $cmp {
+			|$cmp.&compile-cromponent<exports><sub>.kv.map: -> $name, $sub {
+				"&__TEMPLATE_SUB__$name" => sub ($comp = $cmp, |c) {
+					with $comp {
+						$sub.($_, |c)
+					} else {
+						$sub.($cmp.new: |c)
+					}
+				},
+			}
+		}),
+		|@components-macro.map: -> $cmp {
+			|$cmp.&compile-cromponent<exports><macro>.kv.map: -> $name, $macro {
+				"&__TEMPLATE_MACRO__$name" => sub (&body, $comp = $cmp, |c) {
+					with $comp {
+						$macro.(&body, $_, |c)
+					} else {
+						$macro.(&body, $cmp.new: |c)
+					}
+				}
+			}
+		},
+	},
 }
 
 

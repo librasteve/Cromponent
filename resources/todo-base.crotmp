@@ -1,0 +1,18 @@
+<:use Todo>
+<:use Boilerplate>
+
+<|Boilerplate(:htmx, :title('Todo - Cromponent'))>
+	<table>
+		<@.todos: $todo>
+			<&Todo($todo)>
+		</@>
+	</table>
+	<form
+		hx-post="/todo"
+		hx-target="table"
+		hx-swap="beforeend"
+		hx-on::after-request="this.reset()"
+	>
+		<input name=data><button type=submit>+</button>
+	</form>
+</|>
