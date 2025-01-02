@@ -2,7 +2,6 @@
 
 use Cro::HTTP::Router;
 use Cro::WebApp::Template;
-use Cromponent;
 
 sub macro-routes is export {
 	route {

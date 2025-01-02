@@ -1,17 +1,13 @@
-#!/usr/bin/env raku
-
 use Cro::HTTP::Router;
 use Cro::WebApp::Template;
 use Todo;
 
 sub todo-routes is export {
 	route {
-		#resources-from %?RESOURCES;
-		#templates-from-resources;
 		template-location "resources/";
 
-		Todo.^add;
+		Todo.^add-cromponent-routes;
 
-		get -> { template "todo-base.crotmp", { :todos(Todo.all) } }
+		get -> { template "todo-base.crotmp", { :todos(Todo.all), :base</todo/> } }
 	}
 }

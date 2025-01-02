@@ -8,31 +8,27 @@ use Cro::WebApp::Template;
 use Table;
 
 my $routes = route {
-	#my $table = Table.new:
-	#	:head[["Planet", "Fiameter (km)", "Distance to Sun (AU)", "Orbit (days)"],],
-	#	:body[
-	#		["Mercury", "4,880" , "0.39", "88" ],
-	#		["Venus"  , "12,104", "0.72", "225"],
-	#		["Earth"  , "12,742", "1.00", "365"],
-	#		["Mars"   , "6,779" , "1.52", "687"],
-	#	],
-	#	:foot[["Average", "9,126", "0.91", "341"],]
-	#;
-	#
-	#my $themed  = $table.clone: :head-theme<light>;
-	#my $striped = $table.clone: :classes<striped>;
-	#
-	#my $tables = {
-	#	:tables[
-	#		{ :tags<a e i o u>, :table($table),  },
-	#		{ :tags<a e i o u>, :table($themed), },
-	#		{ :tags<a e i o u>, :table($striped),},
-	#	],
-	#};
+	my $table = Table.new:
+		:head[["Planet", "Fiameter (km)", "Distance to Sun (AU)", "Orbit (days)"],],
+		:body[
+			["Mercury", "4,880" , "0.39", "88" ],
+			["Venus"  , "12,104", "0.72", "225"],
+			["Earth"  , "12,742", "1.00", "365"],
+			["Mars"   , "6,779" , "1.52", "687"],
+		],
+		:foot[["Average", "9,126", "0.91", "341"],]
+	;
+
+	my $themed  = $table.clone: :head-theme<light>;
+	my $striped = $table.clone: :classes<striped>;
+
+	my $tables = {
+		:tables[ $table, $themed, $striped ],
+	};
 
 	template-location "resources/";
 	get  -> {
-		#template "table.crotmp", $tables;
+		template "table.crotmp", $tables;
 	}
 }
 my Cro::Service $http = Cro::HTTP::Server.new(

@@ -7,11 +7,9 @@ use Cro::WebApp::Template;
 use Todo;
 
 my $routes = route {
-	#resources-from %?RESOURCES;
-	#templates-from-resources;
 	template-location "resources/";
 
-	Todo.^add;
+	Todo.^add-cromponent-routes;
 
 	get -> { template "todo-base.crotmp", { :todos(Todo.all) } }
 }

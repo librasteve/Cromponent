@@ -1,15 +1,18 @@
 use Cromponent;
 
-unit class Start is macro;
+class Start does Cromponent is macro {
+	method RENDER {
+		Q:to/END/;
+		<:use Head>
 
-method RENDER {
-	Q:to/END/;
-	<:use Head>
-	<html>
-		<&Head(:htmx)>
-		<body>
-			<:body>
-		</body>
-	</html>
-	END
+		<html>
+			<&Head(:!htmx)>
+			<body>
+				<:body>
+			</body>
+		</html>
+		END
+	}
 }
+
+sub EXPORT() { Start.^exports }

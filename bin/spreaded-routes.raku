@@ -3,14 +3,14 @@
 use lib "lib";
 use lib "bin/lib";
 use todo-routes;
-#use macro-routes;
+use macro-routes;
 
 use Cro::HTTP::Router;
 use Cro::HTTP::Server;
 
 my $routes = route {
-    include todo  => todo-routes ;
-    #include macro => macro-routes;
+    include todo  => todo-routes;
+    include macro => macro-routes;
 }
 
 my Cro::Service $http = Cro::HTTP::Server.new(
