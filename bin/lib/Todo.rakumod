@@ -1,33 +1,35 @@
-use Cromponent <export>;
+use Cromponent;
+use Red:api<2>;
 
-my UInt $next = 1;
-class Todo is cromponent {
-	my @todos = do for <blablabla blebleble> -> $data { Todo.new: :$data }
-	has UInt $.id = $next++;
-	has Bool $.done is rw = False;
-	has Str  $.data is required;
+model Todo does Cromponent {
+	has UInt   $.id   is serial;
+	has Bool() $.done is rw is column = False;
+	has Str()  $.data is column is required;
 
-	method LOAD(UInt() $id) { @todos.first: { .id == $id } }
-	method CREATE(*%data)   { @todos.push: my $n = self.new: |%data; $n }
-	method DELETE           { @todos .= grep: { .id != $!id } }
+	method LOAD(Str() $id)  { Todo.^load: $id }
+	method CREATE(*%data)   { Todo.^create: |%data }
+	method DELETE           { $.^delete }
 
-	method all { @todos }
-
-	method toggle {
-		$!done = !$!done
+	method toggle is accessible {
+		$!done = !$!done;
+		$.^save
 	}
 
 	method RENDER {
 		qq:to/END/;
-			<tr>
+			<tr id="todo-<.id>">
 				<td>
-					<input
-						type=checkbox
-						<?.done> checked </?>
-						hx-get="/todo/<.id>/toggle"
-						hx-target="closest tr"
-						hx-swap="outerHTML"
-					>
+					<label class="todo-toggle">
+						<input
+							type="checkbox"
+							<?.done> checked </?>
+							hx-get="./todo/<.id>/toggle"
+							hx-target="closest tr"
+							hx-swap="outerHTML"
+						>
+						<span class="custom-checkbox">
+						</span>
+					</label>
 				</td>
 				<td>
 					<?.done>
@@ -39,7 +41,7 @@ class Todo is cromponent {
 				</td>
 				<td>
 					<button
-						hx-delete="/todo/<.id>"
+						hx-delete="./todo/<.id>"
 						hx-confirm="Are you sure?"
 						hx-target="closest tr"
 						hx-swap="delete"
@@ -52,3 +54,6 @@ class Todo is cromponent {
 	}
 }
 
+sub EXPORT() {
+	Todo.^exports
+}

@@ -13,6 +13,7 @@
   "name": "Cromponent",
   "perl": "6.d",
   "provides": {
+    "Boilerplate": "lib/Boilerplate.rakumod",
     "Cromponent": "lib/Cromponent.rakumod"
   },
   "resources": [

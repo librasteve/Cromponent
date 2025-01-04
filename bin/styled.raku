@@ -2,17 +2,18 @@
 
 use lib "lib";
 use lib "bin/lib";
-use todo-routes;
-use macro-routes;
-
 use Cro::HTTP::Router;
 use Cro::HTTP::Server;
+use Cro::WebApp::Template;
+use StyledComponent;
+use YellowBox;
 
 my $routes = route {
-    include todo  => todo-routes;
-    include macro => macro-routes;
-}
+	template-location "resources/";
+	get -> { template "styled.crotmp", { :box( YellowBox.new: :42value ) } }
 
+        StyledComponent.add-stylesheet-route;
+}
 my Cro::Service $http = Cro::HTTP::Server.new(
     http => <1.1>,
     host => "0.0.0.0",

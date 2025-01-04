@@ -4,16 +4,23 @@ use lib "bin/lib";
 use Cro::HTTP::Router;
 use Cro::HTTP::Server;
 use Cro::WebApp::Template;
+use Red;
 use Todo;
 
 my $routes = route {
-	#resources-from %?RESOURCES;
-	#templates-from-resources;
+	red-defaults "SQLite";
+	Todo.^create-table;
 	template-location "resources/";
 
-	Todo.^add;
+	Todo.^add-cromponent-routes;
 
-	get -> { template "todo-base.crotmp", { :todos(Todo.all) } }
+	get -> {
+	    template "todo-base.crotmp", { :todos(Todo.^all.Seq) }
+	}
+
+	get -> "css" {
+	    static 'resources/todo.css'
+	}
 }
 my Cro::Service $http = Cro::HTTP::Server.new(
     http => <1.1>,

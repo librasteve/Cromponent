@@ -1,0 +1,193 @@
+/* Geral */
+body {
+    font-family: Arial, sans-serif;
+    margin: 20px;
+    padding: 0;
+    background-color: #f9f9f9;
+    color: #333;
+}
+
+/* Estilização da tabela */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+table tr {
+    transition: all 0.3s ease;
+}
+
+table tr:hover {
+    background-color: #f1f1f1;
+}
+
+table td {
+    padding: 15px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+}
+
+table td:first-child {
+    width: 50px;
+    text-align: center;
+}
+
+table td:last-child {
+    width: 50px;
+    text-align: center;
+}
+
+/* Botão de exclusão */
+button {
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #c0392b;
+}
+
+/* Formulário */
+form {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+form input[name="data"],
+form button {
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    outline: none;
+}
+
+form input[name="data"] {
+    flex: 1;
+}
+
+form button {
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+form button:hover {
+    background-color: #27ae60;
+}
+
+/* Toggle específico para Todo List */
+.todo-toggle {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+}
+
+.todo-toggle input {
+    display: none; /* Esconde o checkbox padrão */
+}
+
+/* Estilo do checkbox customizado */
+.todo-toggle .custom-checkbox {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #4caf50;
+    border-radius: 4px;
+    position: relative;
+    transition: background-color 0.3s ease, border-color 0.3s ease;
+    background-color: #fff;
+}
+
+/* Checkmark quando marcado */
+.todo-toggle .custom-checkbox::after {
+    content: "✓";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 16px;
+    color: white;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* Estilo quando marcado */
+.todo-toggle input:checked + .custom-checkbox {
+    background-color: #4caf50;
+    border-color: #4caf50;
+}
+
+.todo-toggle input:checked + .custom-checkbox::after {
+    opacity: 1;
+}
+
+/* Texto associado */
+.todo-text {
+    font-size: 16px;
+    color: #333;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+/* Texto riscado quando concluído */
+.todo-toggle input:checked ~ .todo-text {
+    text-decoration: line-through;
+    color: #aaa;
+}
+
+/* Estilizar o texto associado */
+table td:nth-child(2) {
+    font-size: 16px;
+    color: #333;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+
+.todo-toggle input:checked ~ td:nth-child(2) {
+    text-decoration: line-through;
+    color: #aaa;
+}
+
+/* Efeito ao adicionar/remover linhas */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+}
+
+tr.added {
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+tr.removed {
+    animation: fadeOut 0.5s ease-in-out;
+    opacity: 0;
+    pointer-events: none;
+}
