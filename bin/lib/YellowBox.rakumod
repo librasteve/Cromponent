@@ -17,12 +17,17 @@ class YellowBox does Cromponent does StyledComponent {
 		border-radius: 10px;
 		font-size: 24px;
 		font-weight: bold;
+		.internal {
+			color: red;
+		}
 		END
 	}
 
 	method RENDER {
 		q:to/END/
-		<div class=<.class>><.value></div>
+		<div class=<.class>><.value>
+			<div class="internal">13</div>
+		</div>
 		END
 	}
 }

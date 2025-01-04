@@ -2,19 +2,8 @@ use Cromponent;
 use UUID::V4;
 
 use CSS::Writer;
-use CSS::Grammar::CSS3;
+use CSS::Nested;
 use CSS::Grammar::AST;
-
-sub parse-stylesheet($css) {
-    use CSS::Grammar::CSS3;
-    use CSS::Grammar::Actions;
-    my CSS::Grammar::Actions $actions .= new;
-
-    CSS::Grammar::CSS3.parse($css, :$actions)
-       or die "unable to parse: $css";
-
-    return $/.ast
-}
 
 my @styles; 
 role StyledComponent {
@@ -35,7 +24,6 @@ role StyledComponent {
   }
 
   my &store-css = my method {
-    note "adding: $!CSS";
     @styles.push: parse-stylesheet ".{ $.classes } \{ { .Str } \}" with $.CSS;
   }
 

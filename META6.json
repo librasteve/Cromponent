@@ -6,7 +6,8 @@
   "build-depends": [
   ],
   "depends": [
-    "Cro::WebApp::Template"
+    "Cro::WebApp::Template",
+    "https://github.com/FCO/CSS-Nested.git"
   ],
   "description": "A way create web components with cro templates",
   "license": "Artistic-2.0",
