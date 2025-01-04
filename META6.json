@@ -14,7 +14,9 @@
   "perl": "6.d",
   "provides": {
     "Boilerplate": "lib/Boilerplate.rakumod",
-    "Cromponent": "lib/Cromponent.rakumod"
+    "Cromponent": "lib/Cromponent.rakumod",
+    "StyledComponent": "lib/StyledComponent.rakumod",
+    "StyledDiv": "lib/StyledDiv.rakumod"
   },
   "resources": [
     "resources/todo-base.crotmp"

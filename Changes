@@ -1,6 +1,9 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - Change engine to inside the class
+    - Make Cromponent a role
+    - Make StyledComponent (still need to make it accept nested rule sets)
 
 0.0.1  2024-12-17T22:47:42Z
     - Initial version
