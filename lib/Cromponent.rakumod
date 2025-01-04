@@ -111,6 +111,7 @@ role Cromponent {
 			:$url-part = $component.^name.lc,
 			:$macro    = $component.HOW.?is-macro($component) // False,
 		) is export {
+			my $cmp-name = $component.^name;
 			use Cro::HTTP::Router;
 			without $*CRO-ROUTE-SET {
 				die "Cromponents should be added from inside a `route {}` block"
@@ -123,6 +124,11 @@ role Cromponent {
 			&update //= -> $id, *%pars { load($id).UPDATE: |%pars  } if $component.^can: "UPDATE";
 
 			with &load {
+				my &LOAD = -> $id {
+					my $obj = load $id;
+					die "Cromponent '$cmp-name' could not be loaded with id '$id'" without $obj;
+					$obj
+				}
 				with &create {
 					note "adding POST $url-part";
 					post -> Str $ where $url-part {
@@ -136,7 +142,7 @@ role Cromponent {
 				note "adding GET $url-part/<id>";
 				get -> Str $ where $url-part, $id {
 					my $tag = $component.^name;
-					my $comp = load $id;
+					my $comp = LOAD $id;
 					content 'text/html', $comp.Str
 				}
 
@@ -164,14 +170,14 @@ role Cromponent {
 						note "adding PUT $url-part/<id>/$name";
 						put -> Str $ where $url-part, $id, Str $name {
 							request-body -> $data {
-								load($id)."$name"(|$data.pairs.Map);
+								LOAD($id)."$name"(|$data.pairs.Map);
 								redirect "../{ $id }", :see-other
 							}
 						}
 					} else {
 						note "adding GET $url-part/<id>/$name";
 						get -> Str $ where $url-part, $id, Str $name {
-							load($id)."$name"();
+							LOAD($id)."$name"();
 							redirect "../{ $id }", :see-other
 						}
 					}

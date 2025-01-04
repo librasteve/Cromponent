@@ -1,0 +1,9 @@
+<:use StyledDiv>
+<:use Boilerplate>
+
+<|Boilerplate(:style-sheets('/css'))>
+	<|StyledDiv('background-color: green;')>
+		42<br>
+		<&HTML(.box)>
+	</|>
+</|>

@@ -1,26 +1,18 @@
 #!/usr/bin/env raku
 
+use lib "lib";
 use lib "bin/lib";
 use Cro::HTTP::Router;
 use Cro::HTTP::Server;
 use Cro::WebApp::Template;
-use Red;
-use Todo;
+use StyledComponent;
+use YellowBox;
 
 my $routes = route {
-	red-defaults "SQLite";
-	Todo.^create-table;
 	template-location "resources/";
+	get -> { template "styled.crotmp", { :box( YellowBox.new: :42value ) } }
 
-	Todo.^add-cromponent-routes;
-
-	get -> {
-	    template "todo-base.crotmp", { :todos(Todo.^all.Seq) }
-	}
-
-	get -> "css" {
-	    static 'resources/todo.css'
-	}
+        StyledComponent.add-stylesheet-route;
 }
 my Cro::Service $http = Cro::HTTP::Server.new(
     http => <1.1>,
@@ -37,4 +29,3 @@ react {
         done;
     }
 }
-
