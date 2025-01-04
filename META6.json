@@ -7,7 +7,7 @@
   ],
   "depends": [
     "Cro::WebApp::Template",
-    "https://github.com/FCO/CSS-Nested.git"
+    "CSS::Nested"
   ],
   "description": "A way create web components with cro templates",
   "license": "Artistic-2.0",
