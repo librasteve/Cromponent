@@ -1,6 +1,7 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - Fix META6.json
 
 0.0.3  2025-01-04T22:53:33Z
     - Start using CSS::Nested

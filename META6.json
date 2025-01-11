@@ -20,7 +20,11 @@
     "StyledDiv": "lib/StyledDiv.rakumod"
   },
   "resources": [
-    "resources/todo-base.crotmp"
+    "macro.crotmp",
+    "styled.crotmp",
+    "table.crotmp",
+    "todo-base.crotmp",
+    "todo.css"
   ],
   "source-url": "https://github.com/FCO/Cromponent.git",
   "tags": [
