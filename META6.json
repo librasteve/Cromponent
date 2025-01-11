@@ -16,8 +16,8 @@
   "provides": {
     "Boilerplate": "lib/Boilerplate.rakumod",
     "Cromponent": "lib/Cromponent.rakumod",
-    "Cromponent::MetaCromponentRole": "lib/Cromponent/MetaCromponentRole.rakumod",
     "Cromponent::CroTemplateOverrides": "lib/Cromponent/CroTemplateOverrides.rakumod",
+    "Cromponent::MetaCromponentRole": "lib/Cromponent/MetaCromponentRole.rakumod",
     "StyledComponent": "lib/StyledComponent.rakumod",
     "StyledDiv": "lib/StyledDiv.rakumod"
   },
@@ -33,5 +33,5 @@
   ],
   "test-depends": [
   ],
-  "version": "0.0.4"
+  "version": "0.0.5"
 }
