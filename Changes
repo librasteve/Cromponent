@@ -1,6 +1,9 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - Split into different files
+    - Fix routes
+    - Accept routs with no id
 
 0.0.4  2025-01-11T13:09:04Z
     - Fix META6.json
