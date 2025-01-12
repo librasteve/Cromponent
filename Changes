@@ -1,6 +1,8 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+
+0.0.8  2025-01-12T23:02:42Z
     - accept http-method on `is accessible`
 
 0.0.7  2025-01-12T17:47:18Z
