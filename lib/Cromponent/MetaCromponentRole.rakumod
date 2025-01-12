@@ -38,7 +38,7 @@ method add-cromponent-routes(
 		}
 		with &create {
 			note "adding POST $url-part";
-			post -> Str $ where $url-part {
+			post ("-> '$url-part' " ~ q[{
 				request-body -> $data {
 					my $new = create |$data.pairs.Map;
 					if &load.count > 0 {
@@ -47,32 +47,32 @@ method add-cromponent-routes(
 						redirect "$url-part", :see-other
 					}
 				}
-			}
+			}]).EVAL;
 		}
 
 		if &load.count > 0 {
 			note "adding GET $url-part/<id>";
-			get -> Str $ where $url-part, $id {
+			get ("-> '$url-part', " ~ q[$id {
 				my $tag = $component.^name;
 				my $comp = LOAD $id;
 				content 'text/html', $comp.Str
-			}
+			}]).EVAL;
 
 			with &del {
 				note "adding DELETE $url-part/<id>";
-				delete -> Str $ where $url-part, $id {
+				delete ("-> '$url-part', " ~ q[$id {
 					del $id;
 					content 'text/html', ""
-				}
+				}]).EVAL;
 			}
 
 			with &update {
 				note "adding PUT $url-part/<id>";
-				put -> Str $ where $url-part, $id {
+				put ("-> '$url-part', " ~ q[$id {
 					request-body -> $data {
 						update $id, |$data.pairs.Map
 					}
-				}
+				}]).EVAL;
 			}
 
 			for $component.^methods.grep(*.?is-accessible) -> $meth {
@@ -80,45 +80,45 @@ method add-cromponent-routes(
 
 				if $meth.signature.params > 2 {
 					note "adding PUT $url-part/<id>/$name";
-					put -> Str $ where $url-part, $id, Str $name {
+					put ("-> '$url-part', " ~ q[$id, Str $name {
 						request-body -> $data {
 							LOAD($id)."$name"(|$data.pairs.Map);
 							redirect "../{ $id }", :see-other
 						}
-					}
+					}]).EVAL;
 				} else {
 					note "adding GET $url-part/<id>/$name";
-					get -> Str $ where $url-part, $id, Str $name {
+					get ("-> '$url-part', " ~ q[$id, Str $name {
 						LOAD($id)."$name"();
 						redirect "../{ $id }", :see-other
-					}
+					}]).EVAL;
 				}
 			}
 		} else {
 			note "adding GET $url-part";
-			get -> Str $ where $url-part {
+			get ("-> '$url-part' " ~ q[{
 				my $tag = $component.^name;
 				my $comp = LOAD;
 				content 'text/html', $comp.Str
-			}
+			}]).EVAL;
 
 			for $component.^methods.grep(*.?is-accessible) -> $meth {
 				my $name = $meth.is-accessible-name;
 
 				if $meth.count > 2 {
 					note "adding PUT $url-part/$name";
-					put -> Str $ where $url-part, Str $name {
+					put ("-> '$url-part', " ~ q[Str $name {
 						request-body -> $data {
 							LOAD."$name"(|$data.pairs.Map);
 							redirect "..", :see-other
 						}
-					}
+					}]).EVAL;
 				} else {
 					note "adding GET $url-part/$name";
-					get -> Str $ where $url-part, Str $name {
+					get ("-> '$url-part', " ~ q[Str $name {
 						LOAD."$name"();
 						redirect "..", :see-other
-					}
+					}]).EVAL;
 				}
 			}
 		}
