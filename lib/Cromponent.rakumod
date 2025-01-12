@@ -12,11 +12,14 @@ multi trait_mod:<is>(Method $m, Bool :$accessible!) is export {
 	trait_mod:<is>($m, :accessible{})
 }
 
-multi trait_mod:<is>(Method $m, Bool :$accessible!) is export {
-	trait_mod:<is>($m, :accessible{})
-}
-
-multi trait_mod:<is>(Method $m, :%accessible! (:$name = $m.name, :$returns-cromponent = False)) is export {
+multi trait_mod:<is>(
+	Method $m,
+	:%accessible! (
+		:$name = $m.name,
+		:$returns-cromponent = False,
+		:$http-method = "GET",
+	)
+) is export {
 	my role IsAccessible {
 		has Str  $.is-accessible-name is rw;
 		method is-accessible { True }
@@ -26,8 +29,13 @@ multi trait_mod:<is>(Method $m, :%accessible! (:$name = $m.name, :$returns-cromp
 		method returns-cromponent { True }
 	}
 
+	my role HTTPMethod {
+		has Str $.http-method;
+	}
+
 	$m does IsAccessible($name);
 	$m does ReturnsCromponent if $returns-cromponent;
+	$m does HTTPMethod($http-method);
 	$m
 }
 

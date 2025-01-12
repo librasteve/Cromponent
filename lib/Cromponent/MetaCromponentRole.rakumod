@@ -79,9 +79,9 @@ method add-cromponent-routes(
 				my $name = $meth.is-accessible-name;
 				my $returns-cromponent =  $meth.returns-cromponent;
 
-				if $meth.signature.params > 2 {
-					note "adding PUT $url-part/<id>/$name";
-					put ("-> '$url-part', " ~ q[$id, Str $name {
+				if $meth.http-method.uc ne "GET" {
+					note "adding {$meth.http-method.uc} $url-part/<id>/$name";
+					http $meth.http-method.uc, ("-> '$url-part', " ~ q[$id, Str $name {
 						request-body -> $data {
 							my $ret = LOAD($id)."$name"(|$data.pairs.Map);
 							do if $returns-cromponent {
@@ -119,9 +119,9 @@ method add-cromponent-routes(
 				my $name = $meth.is-accessible-name;
 				my $returns-cromponent =  $meth.returns-cromponent;
 
-				if $meth.count > 1 {
-					note "adding PUT $url-part/$name";
-					put ("-> '$url-part', " ~ q[Str $name {
+				if $meth.http-method.uc ne "GET" {
+					note "adding {$meth.http-method.uc} $url-part/$name";
+					http $meth.http-method.uc, ("-> '$url-part', " ~ q[Str $name {
 						request-body -> $data {
 							my $ret = LOAD."$name"(|$data.pairs.Map);
 							do if $returns-cromponent {

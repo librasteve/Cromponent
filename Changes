@@ -1,6 +1,7 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - accept http-method on `is accessible`
 
 0.0.7  2025-01-12T17:47:18Z
     - Add query params to GET accessible
