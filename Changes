@@ -1,6 +1,7 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - Add query params to GET accessible
 
 0.0.6  2025-01-12T15:44:56Z
     - Fix endpoints using EVAL
