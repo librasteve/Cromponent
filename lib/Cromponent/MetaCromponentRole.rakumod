@@ -19,23 +19,46 @@ method add-cromponent-routes(
 	}
 	my $route-set := $*CRO-ROUTE-SET;
 
-	&load //= do with $component.^find_method: "LOAD" {
-		do if .count > 1 {
-			-> $id { $component.LOAD: $id };
-		} else {
-			-> { $component.LOAD };
+	my @loads = &load.defined
+	?? &load.candidates
+	!! do with $component.^find_method: "LOAD" {
+		.candidates.map: {
+			my $sig = .signature.params.skip.head(*-1)>>.gist.join: ", ";
+			my $call = .signature.params.skip.head(*-1)>>.name.join: ", ";
+			"-> $sig \{ \$component.LOAD{ ": $call" if $call} }".EVAL
 		}
 	}
-	&create //= -> *%pars      { $component.CREATE: |%pars } if $component.^can: "CREATE";
-	&del    //= -> $id         { load($id).DELETE          } if $component.^can: "DELETE";
-	&update //= -> $id, *%pars { load($id).UPDATE: |%pars  } if $component.^can: "UPDATE";
 
-	with &load {
-		my &LOAD = -> $id? {
-			my $obj = load |($_ with $id);
-			die "Cromponent '$cmp-name' could not be loaded{" with id '$_'" with $id}" without $obj;
-			$obj
-		}
+	for @loads -> &load {
+		&create //= -> *%pars       { $component.CREATE: |%pars            } if $component.^can: "CREATE";
+		&del    //= -> $id?         { load(|($_ with $id)).DELETE          } if $component.^can: "DELETE";
+		&update //= -> $id?, *%pars { load(|($_ with $id)).UPDATE: |%pars  } if $component.^can: "UPDATE";
+
+		my $load-sig  = &load.signature.params.map({
+			my Str $type = .type.HOW ~~ Metamodel::CoercionHOW
+				?? .type.^constraint_type.^name
+				!! .type.^name
+			;
+
+			my Str $name = .name;
+
+			"$type $name"
+		}).join: ", ";
+		my $call-pars = &load.signature.params.map({ .name }).join(", ");
+		my $l = qq[-> $load-sig \{
+			my \$obj = load $call-pars;
+			die "Cromponent '$cmp-name' could not be loaded\{ " with '$call-pars'" if ($call-pars) }" without \$obj;
+			\$obj
+		}];
+		my &LOAD = $l.EVAL;
+
+		note "adding GET { $url-part }{ "/<id>" if $load-sig}";
+		get ("-> '$url-part'{ ", $load-sig" if $load-sig}" ~ q[ {
+			my $tag = $component.^name;
+			my $comp = LOAD ] ~ $call-pars ~ Q[;
+			content 'text/html', $comp.Str
+		}]).EVAL;
+
 		with &create {
 			note "adding POST $url-part";
 			post ("-> '$url-part' " ~ q[{
@@ -51,19 +74,13 @@ method add-cromponent-routes(
 		}
 
 		if &load.count > 0 {
-			note "adding GET $url-part/<id>";
-			get ("-> '$url-part', " ~ q[$id {
-				my $tag = $component.^name;
-				my $comp = LOAD $id;
-				content 'text/html', $comp.Str
-			}]).EVAL;
-
 			with &del {
 				note "adding DELETE $url-part/<id>";
-				delete ("-> '$url-part', " ~ q[$id {
+				my $code = "-> '$url-part', " ~ q[$id {
 					del $id;
 					content 'text/html', ""
-				}]).EVAL;
+				}];
+				delete $code.EVAL;
 			}
 
 			with &update {
@@ -77,7 +94,7 @@ method add-cromponent-routes(
 
 			for $component.^methods.grep(*.?is-accessible) -> $meth {
 				my $name = $meth.is-accessible-name;
-				my $returns-cromponent =  $meth.returns-cromponent;
+				my $returns-cromponent =  $meth.?returns-cromponent;
 
 				if $meth.http-method.uc ne "GET" {
 					note "adding {$meth.http-method.uc} $url-part/<id>/$name";
@@ -108,16 +125,9 @@ method add-cromponent-routes(
 				}
 			}
 		} else {
-			note "adding GET $url-part";
-			get ("-> '$url-part' " ~ q[{
-				my $tag = $component.^name;
-				my $comp = LOAD;
-				content 'text/html', $comp.Str
-			}]).EVAL;
-
 			for $component.^methods.grep(*.?is-accessible) -> $meth {
 				my $name = $meth.is-accessible-name;
-				my $returns-cromponent =  $meth.returns-cromponent;
+				my $returns-cromponent =  $meth.?returns-cromponent;
 
 				if $meth.http-method.uc ne "GET" {
 					note "adding {$meth.http-method.uc} $url-part/$name";
