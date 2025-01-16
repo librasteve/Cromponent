@@ -51,8 +51,9 @@ method add-cromponent-routes(
 			\$obj
 		}];
 		my &LOAD = $l.EVAL;
+		my $path = &load.signature.params.map({ "/<{ .name }>" });
 
-		note "adding GET { $url-part }{ "/<id>" if $load-sig}";
+		note "adding GET { $url-part }$path";
 		get ("-> '$url-part'{ ", $load-sig" if $load-sig}" ~ q[ {
 			my $tag = $component.^name;
 			my $comp = LOAD ] ~ $call-pars ~ Q[;
@@ -73,91 +74,54 @@ method add-cromponent-routes(
 			}]).EVAL;
 		}
 
-		if &load.count > 0 {
-			with &del {
-				note "adding DELETE $url-part/<id>";
-				my $code = "-> '$url-part', " ~ q[$id {
-					del $id;
-					content 'text/html', ""
-				}];
-				delete $code.EVAL;
-			}
+		with &del {
+			note "adding DELETE $url-part$path";
+			my $code = "-> '$url-part', " ~ q[$id {
+				del $id;
+				content 'text/html', ""
+			}];
+			delete $code.EVAL;
+		}
 
-			with &update {
-				note "adding PUT $url-part/<id>";
-				put ("-> '$url-part', " ~ q[$id {
+		with &update {
+			note "adding PUT $url-part$path";
+			put ("-> '$url-part', " ~ q[$id {
+				request-body -> $data {
+					update $id, |$data.pairs.Map
+				}
+			}]).EVAL;
+		}
+
+		for $component.^methods.grep(*.?is-accessible) -> $meth {
+			my $name = $meth.is-accessible-name;
+			my $returns-cromponent =  $meth.?returns-cromponent;
+
+			if $meth.http-method.uc ne "GET" {
+				note "adding {$meth.http-method.uc} $url-part$path/$name";
+				http $meth.http-method.uc, ("-> '$url-part'{", $load-sig" if $load-sig} " ~ q[, Str $__method-name {
 					request-body -> $data {
-						update $id, |$data.pairs.Map
+						my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
+						do if $returns-cromponent {
+							content 'text/html', $ret.Str
+						} else {
+							] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
+						}
 					}
 				}]).EVAL;
-			}
+			} else {
+				my @params = $meth.signature.params.skip.head(*-1);
+				my $query  = @params.map({", { .gist } is query"}).join: ", ";
+				my $params = @params.map({":{.name}"}).join: ", ";
 
-			for $component.^methods.grep(*.?is-accessible) -> $meth {
-				my $name = $meth.is-accessible-name;
-				my $returns-cromponent =  $meth.?returns-cromponent;
-
-				if $meth.http-method.uc ne "GET" {
-					note "adding {$meth.http-method.uc} $url-part/<id>/$name";
-					http $meth.http-method.uc, ("-> '$url-part', " ~ q[$id, Str $name {
-						request-body -> $data {
-							my $ret = LOAD($id)."$name"(|$data.pairs.Map);
-							do if $returns-cromponent {
-								content 'text/html', $ret.Str
-							} else {
-								redirect "../{ $id }", :see-other
-							}
-						}
-					}]).EVAL;
-				} else {
-					my @params = $meth.signature.params.skip.head(*-1);
-					my $query = @params.map({", { .gist } is query"}).join: ", ";
-					my $params = @params.map({":{.name}"}).join: ", ";
-
-					note "adding GET $url-part/<id>/$name";
-					get ("-> '$url-part', " ~ q[$id, Str $name] ~ ($query if @params) ~ q[ {
-						my $ret = LOAD($id)."$name"(] ~ $params ~ q[);
-						do if $returns-cromponent {
-							content 'text/html', $ret.Str
-						} else {
-							redirect "../{ $id }", :see-other
-						}
-					}]).EVAL;
-				}
-			}
-		} else {
-			for $component.^methods.grep(*.?is-accessible) -> $meth {
-				my $name = $meth.is-accessible-name;
-				my $returns-cromponent =  $meth.?returns-cromponent;
-
-				if $meth.http-method.uc ne "GET" {
-					note "adding {$meth.http-method.uc} $url-part/$name";
-					http $meth.http-method.uc, ("-> '$url-part', " ~ q[Str $name {
-						request-body -> $data {
-							my $ret = LOAD."$name"(|$data.pairs.Map);
-							do if $returns-cromponent {
-								content 'text/html', $ret.Str
-							} else {
-								redirect "..", :see-other
-							}
-						}
-					}]).EVAL;
-				} else {
-					note "adding GET $url-part/$name";
-					my @params = $meth.signature.params.skip.head(*-1);
-					my $query = @params.map({", { .gist } is query"}).join: ", ";
-					my $params = @params.map({":{.name}"}).join: ", ";
-
-					my $sub = "-> '$url-part', " ~ q[Str $name ] ~ ($query if @params) ~ q[ {
-						my $ret = LOAD."$name"(] ~ $params ~ q[);
-						do if $returns-cromponent {
-							content 'text/html', $ret.Str
-						} else {
-							redirect "..", :see-other
-						}
-					}];
-
-					get $sub.EVAL;
-				}
+				note "adding GET $url-part$path/$name";
+				get ("-> '$url-part'{", $load-sig" if $load-sig}" ~ q[, Str $__method-name] ~ ($query if @params) ~ q[ {
+					my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
+					do if $returns-cromponent {
+						content 'text/html', $ret.Str
+					} else {
+						] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
+					}
+				}]).EVAL;
 			}
 		}
 	}
