@@ -51,7 +51,7 @@ role Cromponent {
 		use Cro::WebApp::Template::Repository;
 		my $*TEMPLATE-REPOSITORY = get-template-repository;
 
-		my $resp = compiled.(self,|c);
+		my $resp = compiled.(self, |c);
 
 		if %*WARNINGS {
 			for %*WARNINGS.kv -> $text, $number {

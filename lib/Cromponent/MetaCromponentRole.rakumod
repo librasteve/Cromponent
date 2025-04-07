@@ -1,7 +1,9 @@
 use Cromponent::CroTemplateOverrides;
 unit role Cromponent::MetaCromponentRole;
 
-sub to-kebab(Str() $_) { lc S:g/(\w)<?before <[A..Z]>>/$0-/ }
+sub to-kebab(Str() $_) {
+	lc S:g/(\w)<?before <[A..Z]>>/$0-/
+}
 
 method add-cromponent-routes(
 	$component    is copy,
@@ -9,7 +11,7 @@ method add-cromponent-routes(
 	:delete(&del) is copy,
 	:&create      is copy,
 	:&update      is copy,
-	:$url-part = $component.^name.&to-kebab,
+	:$url-part = $component.^shortname.&to-kebab,
 	:$macro    = $component.HOW.?is-macro($component) // False,
 ) is export {
 	my $cmp-name = $component.^name;
@@ -29,7 +31,7 @@ method add-cromponent-routes(
 		}
 	}
 
-	for @loads -> &load {
+	for @loads.sort(-*.count) -> &load {
 		&create //= -> *%pars       { $component.CREATE: |%pars            } if $component.^can: "CREATE";
 		&del    //= -> $id?         { load(|($_ with $id)).DELETE          } if $component.^can: "DELETE";
 		&update //= -> $id?, *%pars { load(|($_ with $id)).UPDATE: |%pars  } if $component.^can: "UPDATE";
@@ -51,7 +53,7 @@ method add-cromponent-routes(
 			\$obj
 		}];
 		my &LOAD = $l.EVAL;
-		my $path = &load.signature.params.map({ "/<{ .name }>" });
+		my $path = &load.signature.params.map({ "/<{ .type.^name } { .name }>" });
 
 		note "adding GET { $url-part }$path";
 		get ("-> '$url-part'{ ", $load-sig" if $load-sig}" ~ q[ {
@@ -61,11 +63,12 @@ method add-cromponent-routes(
 		}]).EVAL;
 
 		with &create {
-			note "adding POST $url-part";
 			post ("-> '$url-part' " ~ q[{
 				request-body -> $data {
 					my $new = create |$data.pairs.Map;
-					if &load.count > 0 {
+					if $new.^roles.map(*.^name).first: "Cromponent" {
+						content 'text/html', $new.Str
+					} elsif &load.count > 0 {
 						redirect "$url-part/{ $new.id }", :see-other
 					} else {
 						redirect "$url-part", :see-other
@@ -80,14 +83,21 @@ method add-cromponent-routes(
 				del $id;
 				content 'text/html', ""
 			}];
-			delete $code.EVAL;
+			my $deleted = delete $code.EVAL;
+			if $deleted.^roles.map(*.^name).first: "Cromponent" {
+				content $deleted.Str
+			}
 		}
 
 		with &update {
 			note "adding PUT $url-part$path";
 			put ("-> '$url-part', " ~ q[$id {
 				request-body -> $data {
-					update $id, |$data.pairs.Map
+					my $updated = update $id, |$data.pairs.Map;
+					if $updated.^roles.map(*.^name).first: "Cromponent" {
+						return content $deleted.Str
+					}
+					$updated
 				}
 			}]).EVAL;
 		}

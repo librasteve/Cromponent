@@ -1,6 +1,8 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - add types to logs
+    - return Str value if returning Cromponent
 
 0.0.10  2025-01-16T22:01:26Z
     - unify methods
