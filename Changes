@@ -1,6 +1,7 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - return Str value if returning Cromponent
 
 0.0.11  2025-04-07T21:04:29+01:00
     - add types to logs

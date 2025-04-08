@@ -139,7 +139,7 @@ method add-cromponent-routes(
 
 method exports(Mu:U $class) {
 	my Str $compiled = $class.&compile-cromponent;
-	my $name = $class.^name;
+	my $name = $class.^shortname;
 	my &compiled = comp $compiled, $name;
 	do if $class.HOW.?is-macro: $class {
 		Map.new: (
