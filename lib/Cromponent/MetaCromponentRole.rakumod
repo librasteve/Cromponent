@@ -102,6 +102,7 @@ method add-cromponent-routes(
 			}]).EVAL;
 		}
 
+		#iamerejh is-controller also
 		for $component.^methods.grep(*.?is-accessible) -> $meth {
 			my $name = $meth.is-accessible-name;
 			my $returns-cromponent =  $meth.?returns-cromponent;
@@ -131,6 +132,29 @@ method add-cromponent-routes(
 					} else {
 						] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
 					}
+				}]).EVAL;
+			}
+		}
+
+		#iamerejh - next => create & update
+		for $component.^methods.grep(*.?is-controller) -> $meth {
+			my $name = $meth.is-controller-name;
+
+			if $meth.http-method.uc ne "GET" {
+				note "adding {$meth.http-method.uc} $url-part$path/$name";
+				http $meth.http-method.uc, ("-> '$url-part'{", $load-sig" if $load-sig} " ~ q[, Str $__method-name {
+					request-body -> $data {
+						my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
+					}
+				}]).EVAL;
+			} else {
+				my @params = $meth.signature.params.skip.head(*-1);
+				my $query  = @params.map({", { .gist } is query"}).join: ", ";
+				my $params = @params.map({":{.name}"}).join: ", ";
+
+				note "adding GET $url-part$path/$name";
+				get ("-> '$url-part'{", $load-sig" if $load-sig}" ~ q[, Str $__method-name] ~ ($query if @params) ~ q[ {
+					my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
 				}]).EVAL;
 			}
 		}
