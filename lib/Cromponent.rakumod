@@ -245,7 +245,7 @@ The call to the .^add-cromponent-routes method will create (on this case) 2 endp
 
 =item C</text/<id>/toggle> -- that will load the object using the method C<LOAD> and call C<toggle> on it
 
-You can also define the method C<CREATE>, C<DELETE>, and C<UPDATE> to allow it to create other endpoints.
+You can also define the method C<ADD>, C<DELETE>, and C<UPDATE> to allow it to create other endpoints.
 
 =end item
 

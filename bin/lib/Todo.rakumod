@@ -7,7 +7,7 @@ model Todo does Cromponent {
 	has Str()  $.data is column is required;
 
 	method LOAD(Str() $id)  { Todo.^load: $id }
-	method CREATE(*%data)   { Todo.^create: |%data }
+	method ADD(*%data)   { Todo.^create: |%data }
 	method DELETE           { $.^delete }
 
 	method toggle is accessible {

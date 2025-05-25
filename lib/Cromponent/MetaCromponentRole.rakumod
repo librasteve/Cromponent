@@ -9,7 +9,7 @@ method add-cromponent-routes(
 	$component    is copy,
 	:&load        is copy,
 	:delete(&del) is copy,
-	:&create      is copy,
+	:&add         is copy,
 	:&update      is copy,
 	:$url-part = $component.^shortname.&to-kebab,
 	:$macro    = $component.HOW.?is-macro($component) // False,
@@ -32,7 +32,7 @@ method add-cromponent-routes(
 	}
 
 	for @loads.sort(-*.count) -> &load {
-		&create //= -> *%pars       { $component.CREATE: |%pars            } if $component.^can: "CREATE";
+		&add    //= -> *%pars       { $component.ADD: |%pars               } if $component.^can: "ADD";
 		&del    //= -> $id?         { load(|($_ with $id)).DELETE          } if $component.^can: "DELETE";
 		&update //= -> $id?, *%pars { load(|($_ with $id)).UPDATE: |%pars  } if $component.^can: "UPDATE";
 
@@ -62,10 +62,10 @@ method add-cromponent-routes(
 			content 'text/html', $comp.Str
 		}]).EVAL;
 
-		with &create {
+		with &add {
 			post ("-> '$url-part' " ~ q[{
 				request-body -> $data {
-					my $new = create |$data.pairs.Map;
+					my $new = add |$data.pairs.Map;
 					if $new.^roles.map(*.^name).first: "Cromponent" {
 						content 'text/html', $new.Str
 					} elsif &load.count > 0 {
@@ -94,15 +94,29 @@ method add-cromponent-routes(
 			put ("-> '$url-part', " ~ q[$id {
 				request-body -> $data {
 					my $updated = update $id, |$data.pairs.Map;
-					if $updated.^roles.map(*.^name).first: "Cromponent" {
-						return content $deleted.Str
-					}
 					$updated
 				}
 			}]).EVAL;
 		}
 
-		#iamerejh is-controller also
+# following was giving this error
+#		Variable '$deleted' is not declared.  Did you mean '&delete'?
+#at /Users/stephenroe/Library/CloudStorage/Dropbox/GitWorld/Air-Play/EVAL_8:5
+#------>                                                 return content ⏏$deleted.Str
+
+#		with &update {
+#			note "adding PUT $url-part$path";
+#			put ("-> '$url-part', " ~ q[$id {
+#				request-body -> $data {
+#					my $updated = update $id, |$data.pairs.Map;
+#					if $updated.^roles.map(*.^name).first: "Cromponent" {
+#						return content $deleted.Str
+#					}
+#					$updated
+#				}
+#			}]).EVAL;
+#		}
+
 		for $component.^methods.grep(*.?is-accessible) -> $meth {
 			my $name = $meth.is-accessible-name;
 			my $returns-cromponent =  $meth.?returns-cromponent;
@@ -136,7 +150,7 @@ method add-cromponent-routes(
 			}
 		}
 
-		#iamerejh - next => create & update
+		#propose to add is-controller - unlike accessible this handles own response (eg an HTMX fragment)
 		for $component.^methods.grep(*.?is-controller) -> $meth {
 			my $name = $meth.is-controller-name;
 
@@ -144,7 +158,7 @@ method add-cromponent-routes(
 				note "adding {$meth.http-method.uc} $url-part$path/$name";
 				http $meth.http-method.uc, ("-> '$url-part'{", $load-sig" if $load-sig} " ~ q[, Str $__method-name {
 					request-body -> $data {
-						my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
+						LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
 					}
 				}]).EVAL;
 			} else {
@@ -154,7 +168,7 @@ method add-cromponent-routes(
 
 				note "adding GET $url-part$path/$name";
 				get ("-> '$url-part'{", $load-sig" if $load-sig}" ~ q[, Str $__method-name] ~ ($query if @params) ~ q[ {
-					my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
+					LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
 				}]).EVAL;
 			}
 		}
