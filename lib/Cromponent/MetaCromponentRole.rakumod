@@ -94,28 +94,13 @@ method add-cromponent-routes(
 			put ("-> '$url-part', " ~ q[$id {
 				request-body -> $data {
 					my $updated = update $id, |$data.pairs.Map;
+					if $updated.^roles.map(*.^name).first: "Cromponent" {
+						return content $updated.Str
+					}
 					$updated
 				}
 			}]).EVAL;
 		}
-
-# following was giving this error
-#		Variable '$deleted' is not declared.  Did you mean '&delete'?
-#at /Users/stephenroe/Library/CloudStorage/Dropbox/GitWorld/Air-Play/EVAL_8:5
-#------>                                                 return content ⏏$deleted.Str
-
-#		with &update {
-#			note "adding PUT $url-part$path";
-#			put ("-> '$url-part', " ~ q[$id {
-#				request-body -> $data {
-#					my $updated = update $id, |$data.pairs.Map;
-#					if $updated.^roles.map(*.^name).first: "Cromponent" {
-#						return content $deleted.Str
-#					}
-#					$updated
-#				}
-#			}]).EVAL;
-#		}
 
 		for $component.^methods.grep(*.?is-accessible) -> $meth {
 			my $name = $meth.is-accessible-name;
