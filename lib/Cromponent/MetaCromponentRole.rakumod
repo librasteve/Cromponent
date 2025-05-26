@@ -150,7 +150,7 @@ method add-cromponent-routes(
 			}
 		}
 
-		#propose to add is-controller - unlike accessible this handles own response (eg an HTMX fragment)
+		#| is-controller trait - unlike is accessible this handles own response
 		for $component.^methods.grep(*.?is-controller) -> $meth {
 			my $name = $meth.is-controller-name;
 
