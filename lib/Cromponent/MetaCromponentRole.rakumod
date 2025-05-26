@@ -139,8 +139,8 @@ method add-cromponent-routes(
 		for $component.^methods.grep(*.?is-controller) -> $meth {
 			my $name = $meth.is-controller-name;
 
+			note "adding {$meth.http-method.uc} $url-part$path/$name";
 			if $meth.http-method.uc ne "GET" {
-				note "adding {$meth.http-method.uc} $url-part$path/$name";
 				http $meth.http-method.uc, ("-> '$url-part'{", $load-sig" if $load-sig} " ~ q[, Str $__method-name {
 					request-body -> $data {
 						LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
@@ -151,7 +151,6 @@ method add-cromponent-routes(
 				my $query  = @params.map({", { .gist } is query"}).join: ", ";
 				my $params = @params.map({":{.name}"}).join: ", ";
 
-				note "adding GET $url-part$path/$name";
 				get ("-> '$url-part'{", $load-sig" if $load-sig}" ~ q[, Str $__method-name] ~ ($query if @params) ~ q[ {
 					LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
 				}]).EVAL;
