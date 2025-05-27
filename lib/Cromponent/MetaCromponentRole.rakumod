@@ -104,15 +104,18 @@ method add-cromponent-routes(
 
 		for $component.^methods.grep(*.?is-accessible) -> $meth {
 			my $name = $meth.is-accessible-name;
-			my $returns-cromponent =  $meth.?returns-cromponent;
+			my $returns-cromponent = $meth.?returns-cromponent;
+			my $returns-html = $meth.?returns-html;
 
+			note "adding {$meth.http-method.uc} $url-part$path/$name";
 			if $meth.http-method.uc ne "GET" {
-				note "adding {$meth.http-method.uc} $url-part$path/$name";
 				http $meth.http-method.uc, ("-> '$url-part'{", $load-sig" if $load-sig} " ~ q[, Str $__method-name {
 					request-body -> $data {
 						my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
 						do if $returns-cromponent {
 							content 'text/html', $ret.Str
+						} elsif $returns-html {
+							content 'text/html', $ret
 						} else {
 							] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
 						}
@@ -123,36 +126,15 @@ method add-cromponent-routes(
 				my $query  = @params.map({", { .gist } is query"}).join: ", ";
 				my $params = @params.map({":{.name}"}).join: ", ";
 
-				note "adding GET $url-part$path/$name";
 				get ("-> '$url-part'{", $load-sig" if $load-sig}" ~ q[, Str $__method-name] ~ ($query if @params) ~ q[ {
 					my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
 					do if $returns-cromponent {
 						content 'text/html', $ret.Str
+					} elsif $returns-html {
+						content 'text/html', $ret
 					} else {
 						] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
 					}
-				}]).EVAL;
-			}
-		}
-
-		#| is-controller trait - unlike is accessible this handles own response
-		for $component.^methods.grep(*.?is-controller) -> $meth {
-			my $name = $meth.is-controller-name;
-
-			note "adding {$meth.http-method.uc} $url-part$path/$name";
-			if $meth.http-method.uc ne "GET" {
-				http $meth.http-method.uc, ("-> '$url-part'{", $load-sig" if $load-sig} " ~ q[, Str $__method-name {
-					request-body -> $data {
-						LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
-					}
-				}]).EVAL;
-			} else {
-				my @params = $meth.signature.params.skip.head(*-1);
-				my $query  = @params.map({", { .gist } is query"}).join: ", ";
-				my $params = @params.map({":{.name}"}).join: ", ";
-
-				get ("-> '$url-part'{", $load-sig" if $load-sig}" ~ q[, Str $__method-name] ~ ($query if @params) ~ q[ {
-					LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
 				}]).EVAL;
 			}
 		}

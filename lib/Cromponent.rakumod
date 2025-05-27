@@ -17,6 +17,7 @@ multi trait_mod:<is>(
 	:%accessible! (
 		:$name = $m.name,
 		:$returns-cromponent = False,
+		:$returns-html = False,
 		:$http-method = "GET",
 	)
 ) is export {
@@ -29,12 +30,17 @@ multi trait_mod:<is>(
 		method returns-cromponent { True }
 	}
 
+	my role ReturnsHtml {
+		method returns-html { True }
+	}
+
 	my role HTTPMethod {
 		has Str $.http-method;
 	}
 
 	$m does IsAccessible($name);
 	$m does ReturnsCromponent if $returns-cromponent;
+	$m does ReturnsHtml if $returns-html;
 	$m does HTTPMethod($http-method);
 	$m
 }
