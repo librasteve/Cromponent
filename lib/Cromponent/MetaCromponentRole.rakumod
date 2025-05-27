@@ -9,7 +9,7 @@ method add-cromponent-routes(
 	$component    is copy,
 	:&load        is copy,
 	:delete(&del) is copy,
-	:&create      is copy,
+	:&add         is copy,
 	:&update      is copy,
 	:$url-part = $component.^shortname.&to-kebab,
 	:$macro    = $component.HOW.?is-macro($component) // False,
@@ -32,7 +32,7 @@ method add-cromponent-routes(
 	}
 
 	for @loads.sort(-*.count) -> &load {
-		&create //= -> *%pars       { $component.CREATE: |%pars            } if $component.^can: "CREATE";
+		&add    //= -> *%pars       { $component.ADD: |%pars               } if $component.^can: "ADD";
 		&del    //= -> $id?         { load(|($_ with $id)).DELETE          } if $component.^can: "DELETE";
 		&update //= -> $id?, *%pars { load(|($_ with $id)).UPDATE: |%pars  } if $component.^can: "UPDATE";
 
@@ -62,10 +62,10 @@ method add-cromponent-routes(
 			content 'text/html', $comp.Str
 		}]).EVAL;
 
-		with &create {
+		with &add {
 			post ("-> '$url-part' " ~ q[{
 				request-body -> $data {
-					my $new = create |$data.pairs.Map;
+					my $new = add |$data.pairs.Map;
 					if $new.^roles.map(*.^name).first: "Cromponent" {
 						content 'text/html', $new.Str
 					} elsif &load.count > 0 {
@@ -95,7 +95,7 @@ method add-cromponent-routes(
 				request-body -> $data {
 					my $updated = update $id, |$data.pairs.Map;
 					if $updated.^roles.map(*.^name).first: "Cromponent" {
-						return content $deleted.Str
+						return content $updated.Str
 					}
 					$updated
 				}
@@ -104,15 +104,18 @@ method add-cromponent-routes(
 
 		for $component.^methods.grep(*.?is-accessible) -> $meth {
 			my $name = $meth.is-accessible-name;
-			my $returns-cromponent =  $meth.?returns-cromponent;
+			my $returns-cromponent = $meth.?returns-cromponent;
+			my $returns-html = $meth.?returns-html;
 
+			note "adding {$meth.http-method.uc} $url-part$path/$name";
 			if $meth.http-method.uc ne "GET" {
-				note "adding {$meth.http-method.uc} $url-part$path/$name";
 				http $meth.http-method.uc, ("-> '$url-part'{", $load-sig" if $load-sig} " ~ q[, Str $__method-name {
 					request-body -> $data {
 						my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(|$data.pairs.Map);
 						do if $returns-cromponent {
 							content 'text/html', $ret.Str
+						} elsif $returns-html {
+							content 'text/html', $ret
 						} else {
 							] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
 						}
@@ -123,11 +126,12 @@ method add-cromponent-routes(
 				my $query  = @params.map({", { .gist } is query"}).join: ", ";
 				my $params = @params.map({":{.name}"}).join: ", ";
 
-				note "adding GET $url-part$path/$name";
 				get ("-> '$url-part'{", $load-sig" if $load-sig}" ~ q[, Str $__method-name] ~ ($query if @params) ~ q[ {
 					my $ret = LOAD(] ~ $call-pars ~ Q[)."$__method-name"(] ~ $params ~ q[);
 					do if $returns-cromponent {
 						content 'text/html', $ret.Str
+					} elsif $returns-html {
+						content 'text/html', $ret
 					} else {
 						] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
 					}

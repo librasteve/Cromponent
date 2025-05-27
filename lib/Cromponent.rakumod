@@ -17,6 +17,7 @@ multi trait_mod:<is>(
 	:%accessible! (
 		:$name = $m.name,
 		:$returns-cromponent = False,
+		:$returns-html = False,
 		:$http-method = "GET",
 	)
 ) is export {
@@ -29,12 +30,17 @@ multi trait_mod:<is>(
 		method returns-cromponent { True }
 	}
 
+	my role ReturnsHtml {
+		method returns-html { True }
+	}
+
 	my role HTTPMethod {
 		has Str $.http-method;
 	}
 
 	$m does IsAccessible($name);
 	$m does ReturnsCromponent if $returns-cromponent;
+	$m does ReturnsHtml if $returns-html;
 	$m does HTTPMethod($http-method);
 	$m
 }
@@ -245,7 +251,7 @@ The call to the .^add-cromponent-routes method will create (on this case) 2 endp
 
 =item C</text/<id>/toggle> -- that will load the object using the method C<LOAD> and call C<toggle> on it
 
-You can also define the method C<CREATE>, C<DELETE>, and C<UPDATE> to allow it to create other endpoints.
+You can also define the method C<ADD>, C<DELETE>, and C<UPDATE> to allow it to create other endpoints.
 
 =end item
 

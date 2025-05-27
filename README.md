@@ -154,7 +154,7 @@ You can use Cromponents in 3 distinct (and complementar) ways
 
       * `/text/<id>/toggle` -- that will load the object using the method `LOAD` and call `toggle` on it
 
-    You can also define the method `CREATE`, `DELETE`, and `UPDATE` to allow it to create other endpoints.
+    You can also define the method `ADD`, `DELETE`, and `UPDATE` to allow it to create other endpoints.
 
 AUTHOR
 ======
