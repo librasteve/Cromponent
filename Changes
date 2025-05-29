@@ -1,6 +1,8 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+
+0.0.13  2025-05-29T10:11:07+01:00
     - fixes bug on update
     - adds `returns-html` option to `is accessible`
 
