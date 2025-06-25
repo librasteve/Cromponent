@@ -48,13 +48,22 @@ multi trait_mod:<is>(
 role Cromponent {
 	::?CLASS.HOW does Cromponent::MetaCromponentRole;
 
+	method KEYS {
+		[ $.^name, ]
+	}
+
+	method KEYS-json {
+		use JSON::Fast;
+		to-json $.KEYS
+	}
+
 	my $name = ::?CLASS.^name;
+	my Str $compiled = ::?CLASS.&compile-cromponent;
+	my &compiled = comp $compiled, $name;
+	use Cro::WebApp::Template::Repository;
+
 	::?CLASS.^add_method: "Str", my method (|c) {
-		my Str $compiled = self.WHAT.&compile-cromponent;
-		my $name = self.^name;
-		my &compiled = comp $compiled, $name;
 		my %*WARNINGS;
-		use Cro::WebApp::Template::Repository;
 		my $*TEMPLATE-REPOSITORY = get-template-repository;
 
 		my $resp = compiled.(self, |c);

@@ -1,0 +1,13 @@
+<:use Boilerplate>
+<:use WebSocket>
+<:use Clock>
+
+<|Boilerplate(
+	:title('Todo - test cromponent'),
+	:htmx,
+	:websocket
+)>
+	<|WebSocket>
+		<&Clock>
+	</|>
+</|>

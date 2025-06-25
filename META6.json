@@ -17,8 +17,10 @@
     "Cromponent": "lib/Cromponent.rakumod",
     "Cromponent::CroTemplateOverrides": "lib/Cromponent/CroTemplateOverrides.rakumod",
     "Cromponent::MetaCromponentRole": "lib/Cromponent/MetaCromponentRole.rakumod",
+    "Cromponent::WebSocket": "lib/Cromponent/WebSocket.rakumod",
     "StyledComponent": "lib/StyledComponent.rakumod",
-    "StyledDiv": "lib/StyledDiv.rakumod"
+    "StyledDiv": "lib/StyledDiv.rakumod",
+    "WebSocket": "lib/WebSocket.rakumod"
   },
   "resources": [
     "macro.crotmp",

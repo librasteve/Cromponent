@@ -1,26 +1,47 @@
 use Cromponent::CroTemplateOverrides;
 unit role Cromponent::MetaCromponentRole;
+use Cro::WebSocket::Message;
 
 sub to-kebab(Str() $_) {
 	lc S:g/(\w)<?before <[A..Z]>>/$0-/
 }
 
-method add-cromponent-routes(
-	$component    is copy,
-	:&load        is copy,
-	:delete(&del) is copy,
-	:&add         is copy,
-	:&update      is copy,
-	:$url-part = $component.^shortname.&to-kebab,
-	:$macro    = $component.HOW.?is-macro($component) // False,
-) is export {
-	my $cmp-name = $component.^name;
-	use Cro::HTTP::Router;
-	without $*CRO-ROUTE-SET {
-		die "Cromponents should be added from inside a `route {}` block"
-	}
-	my $route-set := $*CRO-ROUTE-SET;
+method call-pars(&load) {
+	&load.signature.params.map({ .name }).join(", ");
+}
 
+method load-sig(&load) {
+	&load.signature.params.map({
+		my Str $type = .type.HOW ~~ Metamodel::CoercionHOW
+			?? .type.^constraint_type.^name
+			!! .type.^name
+		;
+
+		"$type { .name }"
+	}).join: ", "
+}
+
+method url-path(&load) {
+	&load.signature.params.map({ "/<{ .type.^name } { .name }>" })
+}
+
+method get-sub(
+	$component,
+	&load,
+	Str() :$url-part  = $component.^shortname.&to-kebab,
+	Str() :$load-sig  = $.load-sig(&load),
+	Str() :$call-pars = $.call-pars(&load),
+) {
+	my &LOAD = &load;
+	use Cro::HTTP::Router;
+	("-> '$url-part'{ ", $load-sig" if $load-sig }" ~ q[ {
+		my $tag = $component.^name;
+		my $comp = LOAD ] ~ $call-pars ~ Q[;
+		content 'text/html', $comp.Str
+	}]).EVAL
+}
+
+method list-loads($component, &load?) {
 	my @loads = &load.defined
 	?? &load.candidates
 	!! do with $component.^find_method: "LOAD" {
@@ -31,36 +52,44 @@ method add-cromponent-routes(
 		}
 	}
 
-	for @loads.sort(-*.count) -> &load {
+	@loads.sort: -*.count
+}
+
+method add-cromponent-routes(
+	$component    is copy,
+	:&load        is copy,
+	:delete(&del) is copy,
+	:&add         is copy,
+	:&update      is copy,
+	:$url-part = $component.^shortname.&to-kebab,
+	:$macro    = $component.HOW.?is-macro($component) // False,
+	Bool :$websocket = False,
+) is export {
+	my $cmp-name = $component.^name;
+	$component.?EXTRA-ENDPOINTS;
+	use Cro::HTTP::Router;
+	without $*CRO-ROUTE-SET {
+		die "Cromponents should be added from inside a `route {}` block"
+	}
+	my $route-set := $*CRO-ROUTE-SET;
+
+	for @.list-loads: $component, &load -> &load {
 		&add    //= -> *%pars       { $component.ADD: |%pars               } if $component.^can: "ADD";
 		&del    //= -> $id?         { load(|($_ with $id)).DELETE          } if $component.^can: "DELETE";
 		&update //= -> $id?, *%pars { load(|($_ with $id)).UPDATE: |%pars  } if $component.^can: "UPDATE";
 
-		my $load-sig  = &load.signature.params.map({
-			my Str $type = .type.HOW ~~ Metamodel::CoercionHOW
-				?? .type.^constraint_type.^name
-				!! .type.^name
-			;
-
-			my Str $name = .name;
-
-			"$type $name"
-		}).join: ", ";
-		my $call-pars = &load.signature.params.map({ .name }).join(", ");
+		my $load-sig  = $.load-sig: &load;
+		my $call-pars = $.call-pars: &load;
 		my $l = qq[-> $load-sig \{
 			my \$obj = load $call-pars;
 			die "Cromponent '$cmp-name' could not be loaded\{ " with '$call-pars'" if ($call-pars) }" without \$obj;
 			\$obj
 		}];
 		my &LOAD = $l.EVAL;
-		my $path = &load.signature.params.map({ "/<{ .type.^name } { .name }>" });
+		my $path = $.url-path: &LOAD;
 
 		note "adding GET { $url-part }$path";
-		get ("-> '$url-part'{ ", $load-sig" if $load-sig}" ~ q[ {
-			my $tag = $component.^name;
-			my $comp = LOAD ] ~ $call-pars ~ Q[;
-			content 'text/html', $comp.Str
-		}]).EVAL;
+		get $.get-sub: $component, &LOAD;
 
 		with &add {
 			post ("-> '$url-part' " ~ q[{
