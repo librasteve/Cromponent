@@ -7,6 +7,7 @@
   ],
   "depends": [
     "Cro::WebApp::Template",
+    "Cro::WebSocket",
     "CSS::Nested"
   ],
   "description": "A way create web components with cro templates",
