@@ -1,4 +1,5 @@
 use Cromponent;
+use Cromponent::Traits;
 
 class Start does Cromponent is macro {
 	method RENDER {

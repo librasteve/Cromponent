@@ -1,6 +1,7 @@
 <:use Boilerplate>
 <:use WebSocket>
 <:use Clock>
+<:use Counter>
 
 <|Boilerplate(
 	:title('Todo - test cromponent'),
@@ -8,6 +9,7 @@
 	:websocket
 )>
 	<|WebSocket>
-		<&Clock>
+		<&Clock><br>
+		<&Counter><br>
 	</|>
 </|>

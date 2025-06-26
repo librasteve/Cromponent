@@ -37,7 +37,8 @@ method get-sub(
 	("-> '$url-part'{ ", $load-sig" if $load-sig }" ~ q[ {
 		my $tag = $component.^name;
 		my $comp = LOAD ] ~ $call-pars ~ Q[;
-		content 'text/html', $comp.Str
+		my $html = $comp.Str;
+		content 'text/html', $html
 	}]).EVAL
 }
 
@@ -162,6 +163,7 @@ method add-cromponent-routes(
 					} elsif $returns-html {
 						content 'text/html', $ret
 					} else {
+						return unless $ret;
 						] ~ qq[redirect "..{ "/{ $call-pars }" if $call-pars }", :see-other
 					}
 				}]).EVAL;
@@ -177,13 +179,15 @@ method exports(Mu:U $class) {
 	do if $class.HOW.?is-macro: $class {
 		Map.new: (
 			'&__TEMPLATE_MACRO__' ~ $name => sub (&body, |c) {
-				compiled.(&body, $class.new: |c)
+				my $obj = $class.new: |c;
+				$obj.custom-transformation: compiled.(&body, $obj)
 			}
 		)
 	} else {
 		Map.new: (
 			'&__TEMPLATE_SUB__' ~ $name => sub (|c) {
-				compiled.($class.new(|c))
+				my $obj = $class.new: |c;
+				$obj.custom-transformation: compiled.($obj)
 			}
 		)
 	}

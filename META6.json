@@ -17,6 +17,7 @@
     "Cromponent": "lib/Cromponent.rakumod",
     "Cromponent::CroTemplateOverrides": "lib/Cromponent/CroTemplateOverrides.rakumod",
     "Cromponent::MetaCromponentRole": "lib/Cromponent/MetaCromponentRole.rakumod",
+    "Cromponent::Traits": "lib/Cromponent/Traits.rakumod",
     "Cromponent::WebSocket": "lib/Cromponent/WebSocket.rakumod",
     "StyledComponent": "lib/StyledComponent.rakumod",
     "StyledDiv": "lib/StyledDiv.rakumod",

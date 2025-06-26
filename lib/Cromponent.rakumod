@@ -1,80 +1,40 @@
 use Cromponent::CroTemplateOverrides;
 use Cromponent::MetaCromponentRole;
 
-multi trait_mod:<is>(Mu:U $comp, Bool :$macro!) is export {
-	my role CromponentMacroHOW {
-		method is-macro(|) { True }
-	}
-	$comp.HOW does CromponentMacroHOW
+unit role Cromponent;
+
+::?CLASS.HOW does Cromponent::MetaCromponentRole;
+
+method KEYS {
+	[ $.^name, ]
 }
 
-multi trait_mod:<is>(Method $m, Bool :$accessible!) is export {
-	trait_mod:<is>($m, :accessible{})
+method KEYS-json {
+	use JSON::Fast;
+	to-json $.KEYS
 }
 
-multi trait_mod:<is>(
-	Method $m,
-	:%accessible! (
-		:$name = $m.name,
-		:$returns-cromponent = False,
-		:$returns-html = False,
-		:$http-method = "GET",
-	)
-) is export {
-	my role IsAccessible {
-		has Str  $.is-accessible-name is rw;
-		method is-accessible { True }
-	}
-	
-	my role ReturnsCromponent {
-		method returns-cromponent { True }
-	}
-
-	my role ReturnsHtml {
-		method returns-html { True }
-	}
-
-	my role HTTPMethod {
-		has Str $.http-method;
-	}
-
-	$m does IsAccessible($name);
-	$m does ReturnsCromponent if $returns-cromponent;
-	$m does ReturnsHtml if $returns-html;
-	$m does HTTPMethod($http-method);
-	$m
+method custom-transformation($html) {
+	$html
 }
 
-role Cromponent {
-	::?CLASS.HOW does Cromponent::MetaCromponentRole;
+my $name = ::?CLASS.^name;
+my Str $compiled = ::?CLASS.&compile-cromponent;
+my &compiled = comp $compiled, $name;
+use Cro::WebApp::Template::Repository;
 
-	method KEYS {
-		[ $.^name, ]
-	}
+::?CLASS.^add_method: "Str", my method (|c) {
+	my %*WARNINGS;
+	my $*TEMPLATE-REPOSITORY = get-template-repository;
 
-	method KEYS-json {
-		use JSON::Fast;
-		to-json $.KEYS
-	}
+	my $resp = compiled.(self, |c);
 
-	my $name = ::?CLASS.^name;
-	my Str $compiled = ::?CLASS.&compile-cromponent;
-	my &compiled = comp $compiled, $name;
-	use Cro::WebApp::Template::Repository;
-
-	::?CLASS.^add_method: "Str", my method (|c) {
-		my %*WARNINGS;
-		my $*TEMPLATE-REPOSITORY = get-template-repository;
-
-		my $resp = compiled.(self, |c);
-
-		if %*WARNINGS {
-			for %*WARNINGS.kv -> $text, $number {
-				warn "$text ($number time{ $number == 1 ?? '' !! 's' })";
-			}
+	if %*WARNINGS {
+		for %*WARNINGS.kv -> $text, $number {
+			warn "$text ($number time{ $number == 1 ?? '' !! 's' })";
 		}
-		$resp
 	}
+	return $resp
 }
 
 =begin pod
@@ -121,6 +81,7 @@ Ex:
 
 =begin code :lang<raku>
 use Cromponent;
+use Cromponent::Traits;
 
 class H1 does Cromponent is macro {
 	has Str $.prefix = "My fancy H1";
@@ -208,6 +169,7 @@ Ex:
 
 =begin code :lang<raku>
 use Cromponent;
+use Cromponent::Traits;
 
 class Text does Cromponent {
 	my UInt $next-id = 1;
@@ -223,7 +185,7 @@ class Text does Cromponent {
 
 	method all { %texts.values }
 
-	method toggle is accessoble {
+	method toggle is accessible {
 		$!deleted = !$!deleted
 	}
 

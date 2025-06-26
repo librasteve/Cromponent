@@ -36,6 +36,7 @@ You can use Cromponents in 3 distinct (and complementar) ways
 
     ```raku
     use Cromponent;
+    use Cromponent::Traits;
 
     class H1 does Cromponent is macro {
 	    has Str $.prefix = "My fancy H1";
@@ -105,6 +106,7 @@ You can use Cromponents in 3 distinct (and complementar) ways
 
     ```raku
     use Cromponent;
+    use Cromponent::Traits;
 
     class Text does Cromponent {
 	    my UInt $next-id = 1;
@@ -120,7 +122,7 @@ You can use Cromponents in 3 distinct (and complementar) ways
 
 	    method all { %texts.values }
 
-	    method toggle is accessoble {
+	    method toggle is accessible {
 		    $!deleted = !$!deleted
 	    }
 

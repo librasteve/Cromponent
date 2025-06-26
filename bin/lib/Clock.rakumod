@@ -1,19 +1,14 @@
-use Cromponent;
+use Cromponent::WebSocket;
 
-class Clock does Cromponent {
-	has DateTime $.date-time .= now;
+class Clock does Cromponent::WebSocket {
+	has DateTime $.date-time handles <hh-mm-ss> .= now;
 
 	method LOAD { ::?CLASS.new }
 
 	method RENDER {
 		Q:to/END/;
-			<h2
-				id='clock'
-				ws-send
-				hx-trigger="load"
-				hx-vals='{"cromponent-websocket-keys":<.KEYS-json>}'
-			>
-				<.date-time.hh-mm-ss>
+			<h2 id='clock'>
+				<.hh-mm-ss>
 			</h2>
 		END
 	}

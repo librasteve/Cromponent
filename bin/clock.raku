@@ -6,11 +6,13 @@ use Cro::HTTP::Server;
 use Cro::WebApp::Template;
 use WebSocket;
 use Clock;
+use Counter;
 
 my $routes = route {
 	template-location "resources/";
 	WebSocket.^add-cromponent-routes;
 	Clock.^add-cromponent-routes;
+	Counter.^add-cromponent-routes;
 
 	Supply.interval(1).act: { emit-to-groups Clock.new }
 

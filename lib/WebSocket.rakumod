@@ -1,4 +1,5 @@
 use Cromponent;
+use Cromponent::Traits;
 use Cro::HTTP::Router;
 use Cro::HTTP::Router::WebSocket;
 
@@ -33,30 +34,40 @@ class WebSocket does Cromponent is macro {
   }
 
   method EXTRA-ENDPOINTS {
+    my $next-id;
+    note "adding GET /cromponent-ws";
     get -> "cromponent-ws" {
       my $tag = $.^name;
       web-socket
       :body-parsers(Cro::WebSocket::BodyParser::JSON),
       -> $input, $close {
         my %ids;
+        my Supplier $supplier .= new;
+        my $id = $next-id++;
         supply {
+          my $*CROMPONENT-COMPONENT-REQUEST = True;
           whenever $close {
-            for %ids.kv -> $key, @ids {
-              WebSocket::<%groups>{$key}{@ids}:delete;
+            for %ids.kv -> $key, $ids {
+              WebSocket::<%groups>{$key}{|$ids}:delete;
               WebSocket::<%groups>{$key} if WebSocket::<%groups>{$key}.elems == 0;
             }
           }
           whenever $input {
             my $entry = await .body;
             my @keys = $entry<cromponent-websocket-keys>;
-            my Supplier $supplier .= new;
-            my $id = ++$;
             for @keys -> $key {
+              next if %ids{$key}:exists;
               %ids.push: $key => $id;
               WebSocket::<%groups>{$key}{$id} = $supplier;
             }
             whenever $supplier.Supply -> $html {
               emit $html
+            }
+            LAST {
+              for %ids.kv -> $key, $id {
+                WebSocket::<%groups>{$key}{|$id}:delete;
+                WebSocket::<%groups>{$key}:delete unless WebSocket::<%groups>{$key}.elems;
+              }
             }
           }
         }

@@ -1,4 +1,5 @@
 use Cromponent;
+use Cromponent::Traits;
 
 class Header does Cromponent is macro {
 	has UInt $.num where {$_ <= 6} = 1;
