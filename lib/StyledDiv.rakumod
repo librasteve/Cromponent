@@ -1,5 +1,4 @@
 use Cromponent;
-use Cromponent::Traits;
 use StyledComponent;
 
 class StyledDiv does Cromponent is macro does StyledComponent {

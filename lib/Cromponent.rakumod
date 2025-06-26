@@ -1,6 +1,11 @@
 use Cromponent::CroTemplateOverrides;
 use Cromponent::MetaCromponentRole;
 
+sub EXPORT(--> Map()) {
+	use Cromponent::Traits;
+	Cromponent::Traits::EXPORT::ALL::
+}
+
 unit role Cromponent;
 
 ::?CLASS.HOW does Cromponent::MetaCromponentRole;
@@ -81,7 +86,6 @@ Ex:
 
 =begin code :lang<raku>
 use Cromponent;
-use Cromponent::Traits;
 
 class H1 does Cromponent is macro {
 	has Str $.prefix = "My fancy H1";
@@ -169,7 +173,6 @@ Ex:
 
 =begin code :lang<raku>
 use Cromponent;
-use Cromponent::Traits;
 
 class Text does Cromponent {
 	my UInt $next-id = 1;

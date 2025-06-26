@@ -1,6 +1,11 @@
 use Cromponent;
 use JSON::Fast;
 
+sub EXPORT(--> Map()) {
+	use Cromponent::Traits;
+	Cromponent::Traits::EXPORT::ALL::
+}
+
 unit role Cromponent::WebSocket does Cromponent;
 
 method KEYS {

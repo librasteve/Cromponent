@@ -1,6 +1,5 @@
 use WebSocket;
 use Cromponent::WebSocket;
-use Cromponent::Traits;
 
 class Counter does Cromponent::WebSocket {
 	has UInt $.value = 0;

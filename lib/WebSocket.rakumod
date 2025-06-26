@@ -1,5 +1,4 @@
 use Cromponent;
-use Cromponent::Traits;
 use Cro::HTTP::Router;
 use Cro::HTTP::Router::WebSocket;
 

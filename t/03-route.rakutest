@@ -1,0 +1,408 @@
+use Test;
+use Cromponent;
+use Cro::HTTP::Router;
+use Cro::HTTP::Test;
+
+subtest {
+	my class C does Cromponent {
+		method RENDER {"html"}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),    status => 404;
+		test post('/c'),   status => 404;
+		test delete('/c'), status => 404;
+		test put('/c'),    status => 404;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD { self.new }
+		method RENDER {"html"}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),   status => 405;
+		test delete('/c'), status => 405;
+		test put('/c'),    status => 405;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD { self.new }
+		method ADD  { pass "added" }
+		method RENDER {"html"}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'), status => 405;
+		test put('/c'), status    => 405;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD   { self.new }
+		method ADD    { pass "added" }
+		method DELETE { pass "deleted" }
+		method RENDER {"html"}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'),
+			status => 200,
+			body => ''
+		;
+
+		test put('/c'), status => 405;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD   { self.new }
+		method ADD    { pass "added" }
+		method DELETE { pass "deleted" }
+		method UPDATE { pass "updated" }
+		method RENDER {"html"}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'),
+			status => 200,
+			body => ''
+		;
+
+		test put('/c'),
+			status => 200,
+			body => 'html'
+		;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD   { self.new }
+		method ADD    { pass "added" }
+		method DELETE { pass "deleted" }
+		method UPDATE { pass "updated" }
+		method RENDER {"html"}
+		method meth is accessible { pass "called"; False }
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'),
+			status => 200,
+			body => ''
+		;
+
+		test put('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test get('/c/meth'),
+			status => 200,
+			body => ''
+		;
+
+		test post('/c/meth'), status => 405;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD   { self.new }
+		method ADD    { pass "added" }
+		method DELETE { pass "deleted" }
+		method UPDATE { pass "updated" }
+		method RENDER {"html"}
+		method meth is accessible{ :http-method<POST> } { pass "called"; False }
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'),
+			status => 200,
+			body => ''
+		;
+
+		test put('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test get('/c/meth'), status => 405;
+
+		test post('/c/meth'),
+			status => 200,
+			body => ''
+		;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD   { self.new }
+		method ADD    { pass "added" }
+		method DELETE { pass "deleted" }
+		method UPDATE { pass "updated" }
+		method RENDER {"html"}
+		method meth(Str :$data) is accessible {
+			pass "called";
+			is $data, "from request";
+			False
+		}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'),
+			status => 200,
+			body => ''
+		;
+
+		test put('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test get('/c/meth?data=from+request'),
+			status => 200,
+			body => ''
+		;
+
+		test post('/c/meth'), status => 405;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD   { self.new }
+		method ADD    { pass "added" }
+		method DELETE { pass "deleted" }
+		method UPDATE { pass "updated" }
+		method RENDER {"html"}
+		method meth(:$data) is accessible{ :http-method<POST> } {
+			pass "called";
+			is $data, "from request";
+			False
+		}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'),
+			status => 200,
+			body => ''
+		;
+
+		test put('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test get('/c/meth'), status => 405;
+
+		test post(
+			'/c/meth',
+			body => %( :data('from request') ),
+			content-type => 'application/x-www-form-urlencoded',
+		),
+			status => 200,
+			body => ''
+		;
+	}
+}
+
+subtest {
+	my class C does Cromponent {
+		method LOAD   { self.new }
+		method ADD    { pass "added" }
+		method DELETE { pass "deleted" }
+		method UPDATE { pass "updated" }
+		method RENDER {"html"}
+		method meth(:$data) is accessible{ :http-method<POST> } {
+			pass "called";
+			is $data, "from request";
+			True
+		}
+	}
+
+	test-service route({ C.^add-cromponent-routes }), {
+		test get('/c'),
+			status => 200,
+			body => "html"
+		;
+
+		test post('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test delete('/c'),
+			status => 200,
+			body => ''
+		;
+
+		test put('/c'),
+			status => 200,
+			body => 'html'
+		;
+
+		test get('/c/meth'), status => 405;
+
+		test post(
+			'/c/meth',
+			body => %( :data('from request') ),
+			content-type => 'application/x-www-form-urlencoded',
+		),
+			status => 200,
+		;
+	}
+}
+
+subtest {
+	my class D does Cromponent {
+		my %comps;
+		has Int  $.id;
+		has Bool $.bool = False;
+		has Str  $.value = "initial";
+		method LOAD(Int $id) { %comps{$id} //= self.new: :$id }
+		method RENDER        { "html: <.id> <.bool> <.value>" }
+		method without-args is accessible { $!bool = !$!bool }
+		method with-args-get(Str :$value) is accessible { $!value = $value }
+		method with-args-put(Str :$value, |c) is accessible{ :http-method<PUT> } { note c; $!value = $value }
+	}
+
+	test-service route({ D.^add-cromponent-routes }), {
+		test get('/d/1'),
+			status => 200,
+			body => "html: 1 False initial"
+		;
+		test get('/d/2'),
+			status => 200,
+			body => "html: 2 False initial"
+		;
+
+		test get('/d/1/without-args'),
+			status => 200,
+			body => "html: 1 True initial"
+		;
+		test get('/d/1'),
+			status => 200,
+			body => "html: 1 True initial"
+		;
+		test get('/d/2'),
+			status => 200,
+			body => "html: 2 False initial"
+		;
+
+		test get('/d/2/with-args-get', query => { :value<changed> }),
+			status => 200,
+			body => "html: 2 False changed"
+		;
+		test get('/d/1'),
+			status => 200,
+			body => "html: 1 True initial"
+		;
+		test get('/d/2'),
+			status => 200,
+			body => "html: 2 False changed"
+		;
+
+		test put(
+			'/d/1/with-args-put',
+			body => { :value<again> },
+			content-type => 'application/x-www-form-urlencoded',
+		),
+			status => 200,
+			body => "html: 1 True again"
+		;
+		test get('/d/1'),
+			status => 200,
+			body => "html: 1 True again"
+		;
+
+		test get('/d/2'),
+			status => 200,
+			body => "html: 2 False changed"
+		;
+	}
+}
+
+done-testing;

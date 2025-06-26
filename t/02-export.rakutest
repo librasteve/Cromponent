@@ -1,0 +1,52 @@
+use Test;
+use Cromponent;
+
+use lib "t/lib";
+use C1;
+use M1;
+
+class C1Usage1 does Cromponent {
+	method RENDER {
+		Q:to/END/;
+		<:use C1>
+		<&C1>
+		END
+	}
+}
+
+is C1Usage1.new.Str.trim, "component: 42";
+
+class C1Usage2 does Cromponent {
+	method RENDER {
+		Q:to/END/;
+		<:use C1>
+		<&C1(:data(13))>
+		END
+	}
+}
+
+is C1Usage2.new.Str.trim, "component: 13";
+
+class M1Usage1 does Cromponent {
+	method RENDER {
+		Q:to/END/;
+		<:use M1>
+		<|M1>body</|>
+		END
+	}
+}
+
+is M1Usage1.new.Str.trim, "component: 42; body: body";
+
+class M1Usage2 does Cromponent {
+	method RENDER {
+		Q:to/END/;
+		<:use M1>
+		<|M1(:data(13))>body</|>
+		END
+	}
+}
+
+is M1Usage2.new.Str.trim, "component: 13; body: body";
+
+done-testing;

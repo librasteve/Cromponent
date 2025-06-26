@@ -1,5 +1,4 @@
 use Cromponent;
-use Cromponent::Traits;
 
 class Boilerplate does Cromponent is macro {
   has Bool $.htmx         = False;

@@ -1,3 +1,5 @@
+unit module Cromponent::Traits;
+
 multi trait_mod:<is>(Mu:U $comp, Bool :$macro!) is export {
 	my role CromponentMacroHOW {
 		method is-macro(|) { True }
@@ -41,5 +43,3 @@ multi trait_mod:<is>(
 	$m does HTTPMethod($http-method);
 	$m
 }
-
-
