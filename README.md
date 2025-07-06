@@ -120,7 +120,7 @@ You can use Cromponents in 3 distinct (and complementar) ways
 
 	    method all { %texts.values }
 
-	    method toggle is accessoble {
+	    method toggle is accessible {
 		    $!deleted = !$!deleted
 	    }
 

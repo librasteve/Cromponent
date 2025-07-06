@@ -1,71 +1,37 @@
 use Cromponent::CroTemplateOverrides;
 use Cromponent::MetaCromponentRole;
+use Cro::HTTP::Router;
 
-multi trait_mod:<is>(Mu:U $comp, Bool :$macro!) is export {
-	my role CromponentMacroHOW {
-		method is-macro(|) { True }
-	}
-	$comp.HOW does CromponentMacroHOW
+sub EXPORT(--> Map()) {
+	use Cromponent::Traits;
+	Cromponent::Traits::EXPORT::ALL::
 }
 
-multi trait_mod:<is>(Method $m, Bool :$accessible!) is export {
-	trait_mod:<is>($m, :accessible{})
+unit role Cromponent;
+
+::?CLASS.HOW does Cromponent::MetaCromponentRole;
+
+method custom-transformation($html) {
+	$html
 }
 
-multi trait_mod:<is>(
-	Method $m,
-	:%accessible! (
-		:$name = $m.name,
-		:$returns-cromponent = False,
-		:$returns-html = False,
-		:$http-method = "GET",
-	)
-) is export {
-	my role IsAccessible {
-		has Str  $.is-accessible-name is rw;
-		method is-accessible { True }
-	}
-	
-	my role ReturnsCromponent {
-		method returns-cromponent { True }
-	}
+my $name = ::?CLASS.^name;
+my Str $compiled = ::?CLASS.&compile-cromponent;
+my &compiled = comp $compiled, $name;
+use Cro::WebApp::Template::Repository;
 
-	my role ReturnsHtml {
-		method returns-html { True }
-	}
+::?CLASS.^add_method: "Str", my method (|c) {
+	my %*WARNINGS;
+	my $*TEMPLATE-REPOSITORY = get-template-repository;
 
-	my role HTTPMethod {
-		has Str $.http-method;
-	}
+	my $resp = compiled.(self, |c);
 
-	$m does IsAccessible($name);
-	$m does ReturnsCromponent if $returns-cromponent;
-	$m does ReturnsHtml if $returns-html;
-	$m does HTTPMethod($http-method);
-	$m
-}
-
-role Cromponent {
-	::?CLASS.HOW does Cromponent::MetaCromponentRole;
-
-	my $name = ::?CLASS.^name;
-	::?CLASS.^add_method: "Str", my method (|c) {
-		my Str $compiled = self.WHAT.&compile-cromponent;
-		my $name = self.^name;
-		my &compiled = comp $compiled, $name;
-		my %*WARNINGS;
-		use Cro::WebApp::Template::Repository;
-		my $*TEMPLATE-REPOSITORY = get-template-repository;
-
-		my $resp = compiled.(self, |c);
-
-		if %*WARNINGS {
-			for %*WARNINGS.kv -> $text, $number {
-				warn "$text ($number time{ $number == 1 ?? '' !! 's' })";
-			}
+	if %*WARNINGS {
+		for %*WARNINGS.kv -> $text, $number {
+			warn "$text ($number time{ $number == 1 ?? '' !! 's' })";
 		}
-		$resp
 	}
+	return $resp
 }
 
 =begin pod
@@ -214,7 +180,7 @@ class Text does Cromponent {
 
 	method all { %texts.values }
 
-	method toggle is accessoble {
+	method toggle is accessible {
 		$!deleted = !$!deleted
 	}
 

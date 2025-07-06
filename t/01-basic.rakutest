@@ -1,6 +1,0 @@
-use Test;
-use Cromponent;
-
-pass "replace me";
-
-done-testing;

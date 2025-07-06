@@ -1,0 +1,31 @@
+use Test;
+use Cromponent;
+
+class C1 does Cromponent { method RENDER {"html"} }
+is C1.new.Str, "html";
+
+class C2 does Cromponent {
+	has $.data = 42;
+	method RENDER {"<.data>"}
+}
+
+is C2.new.Str, "42";
+is C2.new(:13data).Str, "13";
+is C2.new(:data<bla>).Str, "bla";
+
+class C3 does Cromponent {
+	method bla { "from method" }
+	method RENDER {"<.bla>"}
+}
+
+is C3.new.Str, "from method";
+
+class C4 does Cromponent {
+	has $.data = 42;
+	method bla($value = "default") { "from method receiving: $value" }
+	method RENDER {"[[[<.data>]]][[[<.bla>]]][[[<.bla('custom')>]]]"}
+}
+
+is C4.new.Str, "[[[42]]][[[from method receiving: default]]][[[from method receiving: custom]]]";
+
+done-testing;

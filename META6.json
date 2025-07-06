@@ -17,6 +17,7 @@
     "Cromponent": "lib/Cromponent.rakumod",
     "Cromponent::CroTemplateOverrides": "lib/Cromponent/CroTemplateOverrides.rakumod",
     "Cromponent::MetaCromponentRole": "lib/Cromponent/MetaCromponentRole.rakumod",
+    "Cromponent::Traits": "lib/Cromponent/Traits.rakumod",
     "StyledComponent": "lib/StyledComponent.rakumod",
     "StyledDiv": "lib/StyledDiv.rakumod"
   },
@@ -31,6 +32,7 @@
   "tags": [
   ],
   "test-depends": [
+    "Cro::HTTP::Test"
   ],
   "version": "0.0.13"
 }
