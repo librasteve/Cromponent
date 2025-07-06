@@ -1,6 +1,5 @@
 use Cromponent::CroTemplateOverrides;
 unit role Cromponent::MetaCromponentRole;
-use Cro::WebSocket::Message;
 
 sub to-kebab(Str() $_) {
 	lc S:g/(\w)<?before <[A..Z]>>/$0-/
@@ -104,10 +103,8 @@ method add-cromponent-routes(
 	:&update      is copy,
 	:$url-part = $component.^shortname.&to-kebab,
 	:$macro    = $component.HOW.?is-macro($component) // False,
-	Bool :$websocket = False,
 ) is export {
 	my $cmp-name = $component.^name;
-	$component.?EXTRA-ENDPOINTS;
 	use Cro::HTTP::Router;
 	without $*CRO-ROUTE-SET {
 		die "Cromponents should be added from inside a `route {}` block"

@@ -1,5 +1,6 @@
 use Cromponent::CroTemplateOverrides;
 use Cromponent::MetaCromponentRole;
+use Cro::HTTP::Router;
 
 sub EXPORT(--> Map()) {
 	use Cromponent::Traits;
@@ -9,15 +10,6 @@ sub EXPORT(--> Map()) {
 unit role Cromponent;
 
 ::?CLASS.HOW does Cromponent::MetaCromponentRole;
-
-method KEYS {
-	[ $.^name, ]
-}
-
-method KEYS-json {
-	use JSON::Fast;
-	to-json $.KEYS
-}
 
 method custom-transformation($html) {
 	$html

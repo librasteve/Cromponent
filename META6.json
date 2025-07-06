@@ -7,7 +7,6 @@
   ],
   "depends": [
     "Cro::WebApp::Template",
-    "Cro::WebSocket",
     "CSS::Nested"
   ],
   "description": "A way create web components with cro templates",
@@ -19,10 +18,8 @@
     "Cromponent::CroTemplateOverrides": "lib/Cromponent/CroTemplateOverrides.rakumod",
     "Cromponent::MetaCromponentRole": "lib/Cromponent/MetaCromponentRole.rakumod",
     "Cromponent::Traits": "lib/Cromponent/Traits.rakumod",
-    "Cromponent::WebSocket": "lib/Cromponent/WebSocket.rakumod",
     "StyledComponent": "lib/StyledComponent.rakumod",
-    "StyledDiv": "lib/StyledDiv.rakumod",
-    "WebSocket": "lib/WebSocket.rakumod"
+    "StyledDiv": "lib/StyledDiv.rakumod"
   },
   "resources": [
     "macro.crotmp",
