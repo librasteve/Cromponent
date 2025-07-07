@@ -21,7 +21,7 @@ method load-sig(&load) {
 }
 
 method url-path(&load) {
-	&load.signature.params.map({ "/<{ .type.^name } { .name }>" })
+	&load.signature.params.map({ "/<{ .type.^name } { .name }>" }).join: ""
 }
 
 method get-sub(
