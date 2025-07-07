@@ -1,0 +1,14 @@
+<:use Boilerplate>
+
+<|Boilerplate(
+	:title('Poll'),
+	:htmx
+)>
+	<h6>logged in as <.user></h6>
+	<hr>
+	<@.polls.Seq>
+		<&HTML($_)>
+	</@>
+	<hr>
+	<a href="/<.user>/polls">all polls</a>
+</|>
