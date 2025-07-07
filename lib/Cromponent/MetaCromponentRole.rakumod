@@ -16,7 +16,7 @@ method load-sig(&load) {
 			!! .type.^name
 		;
 
-		"$type { .name }"
+		"$type { .name }{ " is { .Str }" with .?trait-used }"
 	}).join: ", "
 }
 
@@ -177,10 +177,13 @@ method add-cromponent-routes(
 			}
 
 			my @params = $meth.signature.params.skip.head(*-1);
+			my :(:@no-trait, :@trait) := @params.classify: { .?trait-used ?? "trait" !! "no-trait" }
+			my $traits = @trait.map({ ", { .gist } is { .trait-used }" });
+			say "traits: $traits";
 			note-route-added $meth.http-method.uc, "$url-part$path/$name";
 			if $meth.http-method.uc ne "GET" {
-				my @param-names = @params.map: *.name.substr: 1;
-				my $code = ("sub ('$url-part'{", $load-sig" if $load-sig}, '$name') \{
+				my @param-names = @no-trait.map: *.name.substr: 1;
+				my $code = ("sub ('$url-part'{", $load-sig" if $load-sig}, '$name'{ $traits }) \{
 					request-body -> \$data \{
 						treat-request
 							:load-capture(\\($call-pars)),
@@ -194,10 +197,10 @@ method add-cromponent-routes(
 				}");
 				http $meth.http-method.uc, $code.EVAL;
 			} else {
-				my $query  = @params.map({", { .gist } is query"}).join: ", ";
+				my $query  = @no-trait.map({", { .gist } is query"}).join: ", ";
 				my $params = @params.map({":{.name}"}).join: ", ";
 
-				my $code = ("sub ('$url-part'{", $load-sig" if $load-sig}, '$name'{ "$query" if @params }) \{
+				my $code = ("sub ('$url-part'{", $load-sig" if $load-sig}, '$name'{ "$query" if @params }{ $traits }) \{
 					treat-request :load-capture(\\($call-pars)), :params-capture(\\($params))
 				}");
 				get $code.EVAL

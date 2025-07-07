@@ -36,7 +36,7 @@ model PollView does Cromponent {
 			</?>
 			<!>
 				<h2>
-					<a href="/<.user>/polls/<.poll-id>">
+					<a href="/polls/<.poll-id>">
 						<.poll.descr> (<.poll.total-votes> votes)
 					</a>
 				</h2>

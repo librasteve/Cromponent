@@ -10,5 +10,5 @@
 		<&HTML($_)>
 	</@>
 	<hr>
-	<a href="/<.user>/polls">all polls</a>
+	<a href="/polls">all polls</a>
 </|>

@@ -14,7 +14,7 @@ model Poll does Cromponent {
 	method RENDER {
 		Q:to/END/;
 		<h2>
-			<a href="/<.user>/polls/<.id>">
+			<a href="/polls/<.id>">
 				<.descr> (<.total-votes> votes)
 			</a>
 		</h2>

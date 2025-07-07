@@ -9,6 +9,7 @@ use PollView;
 use PollItem;
 use PollVote;
 use Red:api<2>;
+use UUID;
 
 my $routes = route {
 	PROCESS::<$RED-DEBUG> = %*ENV<RED_DEBUG>;
@@ -37,14 +38,16 @@ my $routes = route {
 	    ]
 	;
 
-	get -> Str $user, 'polls' {
+	get -> 'polls', Str :$user is cookie = UUID.new.Str {
+		response.set-cookie: "user", $user;
 		template "polls.crotmp", {
 			user  => $user,
 			polls => PollView.polls: $user
 		}
 	}
 
-	get -> Str $user, 'polls', UInt $id {
+	get -> 'polls', UInt $id, Str :$user is cookie = UUID.new.Str {
+		response.set-cookie: "user", $user;
 		my $poll-view = PollView.LOAD: $id, $user;
 		template "polls.crotmp", {
 			user  => $user,

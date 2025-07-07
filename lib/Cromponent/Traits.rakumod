@@ -11,6 +11,21 @@ multi trait_mod:<is>(Method $m, Bool :$accessible!) is export {
 	trait_mod:<is>($m, :accessible{})
 }
 
+role TraitUsed { has Str $.trait-used }
+
+multi trait_mod:<is>(Parameter:D $param, :$query! --> Nil) is export {
+	$param does TraitUsed("query");
+}
+multi trait_mod:<is>(Parameter:D $param, :$header! --> Nil) is export {
+	$param does TraitUsed("header");
+}
+multi trait_mod:<is>(Parameter:D $param, :$cookie! --> Nil) is export {
+	$param does TraitUsed("cookie");
+}
+multi trait_mod:<is>(Parameter:D $param, :$auth! --> Nil) is export {
+	$param does TraitUsed("auth");
+}
+
 multi trait_mod:<is>(
 	Method $m,
 	:%accessible! (
