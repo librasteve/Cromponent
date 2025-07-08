@@ -1,0 +1,143 @@
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: system-ui, sans-serif;
+    margin: 2rem auto;
+    max-width: 720px;
+    background-color: #f9fafb;
+    color: #1f2937;
+    padding: 0 1rem;
+}
+
+h6 {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 0.5rem;
+    text-align: center;
+}
+
+hr {
+    margin: 2rem 0;
+    border: none;
+    border-top: 1px solid #e5e7eb;
+}
+
+.poll {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    padding: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.poll h2 {
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    color: #1d4ed8;
+}
+
+.poll h2 a {
+    text-decoration: none;
+    color: inherit;
+}
+
+.poll h2 a:hover {
+    text-decoration: underline;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+}
+
+tr {
+    border-bottom: 1px solid #f3f4f6;
+}
+
+td {
+    padding: 0.75rem 0.5rem;
+    font-size: 0.95rem;
+    vertical-align: middle;
+}
+
+td:nth-child(1) {
+    width: 25%;
+    white-space: normal;
+    /* permite quebra de linha */
+    padding-right: 0.75rem;
+    font-weight: 500;
+
+}
+
+td:nth-child(2) {
+    width: 50%;
+}
+
+td:nth-child(3),
+td:nth-child(4) {
+    width: 12.5%;
+    text-align: right;
+    white-space: nowrap;
+}
+
+.bar-container {
+    background-color: #e5e7eb;
+    border-radius: 0.375rem;
+    height: 1.25rem;
+    width: 100%;
+    overflow: hidden;
+}
+
+.bar-fill {
+    background-color: #3b82f6;
+    height: 100%;
+    transition: width 0.3s ease;
+}
+
+a[href="/polls"] {
+    display: block;
+    text-align: center;
+    margin-top: 2rem;
+    font-weight: 500;
+    color: #2563eb;
+}
+
+a[href="/polls"]:hover {
+    text-decoration: underline;
+}
+
+button,
+input[type="submit"] {
+    padding: 0.4rem 0.8rem;
+    border-radius: 0.375rem;
+    border: 1px solid #d1d5db;
+    background-color: white;
+    font-size: 0.875rem;
+    cursor: pointer;
+    float: right;
+}
+
+button:hover,
+input[type="submit"]:hover {
+    background-color: #f3f4f6;
+}
+
+@media (max-width: 600px) {
+    body {
+        margin: 1rem;
+    }
+
+    td {
+        font-size: 0.875rem;
+    }
+
+    td:nth-child(1),
+    td:nth-child(3),
+    td:nth-child(4) {
+        white-space: normal;
+    }
+}

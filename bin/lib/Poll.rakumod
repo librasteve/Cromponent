@@ -7,39 +7,37 @@ model Poll does Cromponent {
 	has      @.items is relationship(*.poll-id, :model<PollItem>);
 	has      @.votes is relationship(*.poll-id, :model<PollVote>);
 
-	method LOAD(UInt $id) { $.^load: $id }
-	method EXPORT   { [ $!id, ] }
+	method LOAD(Int $poll-id) {
+		Poll.^load: $poll-id
+	}
+
+	method sorted-items {
+		@!items.sort: {
+			|(-.votes if $.did-user-vote),
+			.id
+		}
+	}
 
 	method RENDER {
 		Q:to/END/;
-		<h2>
-			<a href="/polls/<.id>">
-				<.descr> (<.total-votes> votes)
-			</a>
-		</h2>
-		<@.items.Seq div>
-			<label for="poll_item_<.id>"><.descr></label>
-			<progress
-				id="poll_item_<.id>"
-				max="100"
-				value="<.percentage>"
-			>
-				<.percentage>%
-			</progress>
-			<.percentage>%
-		</@>
+		<div class="poll">
+			<h2>
+				<a href="/polls/<.id>">
+					<.descr> (<.votes.elems> vote<?{ .votes.elems != 1 }>s</?>)
+				</a>
+			</h2>
+			<table>
+				<@.sorted-items.Seq>
+					<&HTML($_)>
+				</@>
+			</table>
+		</div>
 		END
 	}
 
-	method has-user-voted(Str $user) {
+	method did-user-vote($user = $*user) {
 		?@.votes.first: *.user eq $user
 	}
-
-	method total-votes {
-		@!votes.elems
-	}
 }
 
-sub EXPORT() {
-	Poll.^exports
-}
+sub EXPORT() { Poll.^exports }

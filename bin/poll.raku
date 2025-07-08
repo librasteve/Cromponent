@@ -5,7 +5,6 @@ use Cro::HTTP::Router;
 use Cro::HTTP::Server;
 use Cro::WebApp::Template;
 use Poll;
-use PollView;
 use PollItem;
 use PollVote;
 use Red:api<2>;
@@ -22,36 +21,49 @@ my $routes = route {
 	PollItem.^add-cromponent-routes;
 
 	Poll.^create:
-	    :descr('test01'),
+	    :descr('What is your favourite Raku feature?'),
 	    :items[
-		%(:descr('item01.01')),
-		%(:descr('item01.02')),
+		%(:descr('Grammar')),
+		%(:descr('Lazy lists')),
+		%(:descr('OOP')),
+		%(:descr('Meta')),
+		%(:descr('Multi paradigm')),
+		%(:descr('Multi sub/methods')),
+		%(:descr('Concurrency/parallelism')),
 	    ]
 	;
 
 	Poll.^create:
-	    :descr('test02'),
+	    :descr('What is your favourite way of communication to talk about Raku?'),
 	    :items[
-		%(:descr('item02.01')),
-		%(:descr('item02.02')),
+		%(:descr('IRC')),
+		%(:descr('Discord')),
+		%(:descr('Reddit')),
+		%(:descr('Twitter')),
+		%(:descr('Mastodom')),
+		%(:descr('Facebook')),
+		%(:descr('Email list')),
 	    ]
 	;
 
-	get -> 'polls', Str :$user is cookie = UUID.new.Str {
-		response.set-cookie: "user", $user;
+	get -> 'polls', Str :$*user is cookie = UUID.new.Str {
+		response.set-cookie: "user", $*user;
+		my @polls = Poll.^all.Seq;
 		template "polls.crotmp", {
-			user  => $user,
-			polls => PollView.polls: $user
+			:$*user, :@polls
 		}
 	}
 
-	get -> 'polls', UInt $id, Str :$user is cookie = UUID.new.Str {
-		response.set-cookie: "user", $user;
-		my $poll-view = PollView.LOAD: $id, $user;
+	get -> 'polls', UInt $id, Str :$*user is cookie = UUID.new.Str {
+		response.set-cookie: "user", $*user;
 		template "polls.crotmp", {
-			user  => $user,
-			polls => [$poll-view,]
+			user  => $*user,
+			polls => Poll.LOAD: $id
 		}
+	}
+
+	get -> "css" {
+	    static 'resources/polls.css'
 	}
 }
 my Cro::Service $http = Cro::HTTP::Server.new(

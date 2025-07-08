@@ -12,36 +12,47 @@ model PollItem does Cromponent {
 	has UInt $.votes   is column is rw = 0;
 
 	method LOAD(Int $id) { $.^load: $id }
-	method EXPORT { [$!id, ] }
+
 	method RENDER {
 		Q:to/END/;
-		<label for="poll_<.poll-id>"><.descr></label>
-		<button
-			id="poll_<.poll-id>_item_<.id>"
-			hx-put="/poll-item/<.id>/vote"
-			hx-vals='js:{ item: <.id> }'
-			hx-target="closest .poll"
-		>
-			vote
-		</button>
+		<tr>
+			<td><label for="poll_<.poll-id>"><.descr></label></td>
+			<?.poll.did-user-vote>
+				<td>
+					<div class="bar-container">
+						<div class="bar-fill" style="width: <.percentage>%"></div>
+					</div>
+				</td>
+				<td><.percentage>%</td>
+				<td>(<.votes> vote<?{.votes != 1}>s</?>)</td>
+			</?>
+			<!>
+				<td>
+					<button
+						id="poll_<.poll-id>_item_<.id>"
+						hx-put="/poll-item/<.id>/vote"
+						hx-vals='js:{ item: <.id> }'
+						hx-target="closest .poll"
+						hx-swap="outerHTML"
+					>vote</button>
+				</td>
+			</!>
+		</tr>
 		END
 	}
 
 	method percentage(--> Int()) {
-		return 0 unless $!poll.total-votes;
-		(($.votes / $!poll.total-votes) * 100)
+		$.votes / $!poll.votes * 100 if $!poll.votes
 	}
 
-	method vote(Str :$user is cookie) is accessible{ :http-method<PUT>, :returns-cromponent } {
+	method vote(Str :$*user is cookie) is accessible{ :http-method<PUT>, :returns-cromponent } {
 		red-do :transaction, {
 			$!votes++;
 			self.^save;
-			$!poll.votes.create: :$user;
+			$!poll.votes.create: :$*user;
 			$!poll
 		}
 	}
 }
 
-sub EXPORT() {
-	PollItem.^exports
-}
+sub EXPORT { PollItem.^exports }

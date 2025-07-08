@@ -2,11 +2,12 @@
 
 <|Boilerplate(
 	:title('Poll'),
-	:htmx
+	:htmx,
+	:style-sheets('css')
 )>
 	<h6>logged in as <.user></h6>
 	<hr>
-	<@.polls.Seq>
+	<@.polls>
 		<&HTML($_)>
 	</@>
 	<hr>
