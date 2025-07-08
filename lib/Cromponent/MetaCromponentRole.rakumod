@@ -83,7 +83,8 @@ method list-loads($component, &load?) {
 		.candidates.map: {
 			my $sig = .signature.params.skip.head(*-1)>>.gist.join: ", ";
 			my $call = .signature.params.skip.head(*-1)>>.name.join: ", ";
-			"-> $sig \{ \$component.LOAD{ ": $call" if $call} }".EVAL
+			my $l = "-> $sig \{ \$component.LOAD{ ": $call" if $call} }";
+			$l.EVAL
 		}
 	}
 
@@ -115,8 +116,8 @@ method add-cromponent-routes(
 		my $load-sig  = $.load-sig: &load;
 		my $call-pars = $.call-pars: &load;
 
-		&add    //= -> *%pars              { $component.ADD: |%pars          }       if $component.^can: "ADD";
-		&del    //= "-> $load-sig         \{ load($call-pars).DELETE         }".EVAL if $component.^can: "DELETE";
+		&add    //= -> *%pars      { $component.ADD: |%pars  }       if $component.^can: "ADD";
+		&del    //= "-> $load-sig \{ load($call-pars).DELETE }".EVAL if $component.^can: "DELETE";
 
 		# TODO: differentiate load args from update args
 		&update //= "-> {"$load-sig, " if $load-sig }*%pars \{ load($call-pars).UPDATE: |%pars }".EVAL if $component.^can: "UPDATE";
@@ -133,7 +134,7 @@ method add-cromponent-routes(
 		get $.get-sub: $component, &LOAD;
 
 		with &add {
-			post ("-> '$url-part' " ~ q[{
+			post ("-> '$url-part'{ ", { .Str }" with $load-sig } " ~ q[{
 				request-body -> $data {
 					my $new = add |$data.pairs.Map;
 					if $new.^roles.map(*.^name).first: "Cromponent" {
@@ -179,7 +180,7 @@ method add-cromponent-routes(
 			my @params = $meth.signature.params.skip.head(*-1);
 			my :(:@no-trait, :@trait) := @params.classify: { .?trait-used ?? "trait" !! "no-trait" }
 			my $traits = @trait.map({ ", { .gist } is { .trait-used }" });
-			say "traits: $traits";
+			my $traits-call = @trait.map({ ":{ .name }" }).join: ", ";
 			note-route-added $meth.http-method.uc, "$url-part$path/$name";
 			if $meth.http-method.uc ne "GET" {
 				my @param-names = @no-trait.map: *.name.substr: 1;
@@ -188,9 +189,12 @@ method add-cromponent-routes(
 						treat-request
 							:load-capture(\\($call-pars)),
 							:params-capture(\\({
-								@param-names.map({
-									":$_\(\$data\<$_>)"
-								}).join: ", "
+								(
+									|@param-names.map({
+										":$_\(\$data\<$_>)"
+									}),
+									$traits-call
+								).join: ", "
 							}))
 						;
 					}

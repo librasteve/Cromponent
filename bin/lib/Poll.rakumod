@@ -6,7 +6,6 @@ model Poll does Cromponent {
 	has Str  $.descr is column;
 	has      @.items is relationship(*.poll-id, :model<PollItem>);
 	has      @.votes is relationship(*.poll-id, :model<PollVote>);
-	has Str  $.user  is rw;
 
 	method LOAD(UInt $id) { $.^load: $id }
 	method EXPORT   { [ $!id, ] }

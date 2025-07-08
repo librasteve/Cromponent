@@ -1,6 +1,7 @@
 use Red:api<2>;
 use Cromponent;
 use PollItem;
+use Poll;
 
 model PollView does Cromponent {
 	has Str  $.user    is required;
@@ -8,23 +9,13 @@ model PollView does Cromponent {
 	has UInt $.poll-id = $!poll.id;
 
 	method LOAD(Int $poll-id, Str $user) {
-		require ::("Poll");
-		my $poll = ::("Poll").^load: $poll-id;
-		$poll.user = $user;
+		my $poll = Poll.^load: $poll-id;
 		$.new: :$poll, :$user
 	}
 
 	method polls(Str $user) {
-		require ::("Poll");
-		do for ::("Poll").^all.map(*.id).Seq.sort -> $poll-id {
+		do for Poll.^all.map(*.id).Seq.sort -> $poll-id {
 			self.LOAD: $poll-id, $user
-		}
-	}
-
-	method items {
-		$.poll.items.Seq.map: {
-			.user = $!user;
-			$_
 		}
 	}
 
@@ -40,20 +31,12 @@ model PollView does Cromponent {
 						<.poll.descr> (<.poll.total-votes> votes)
 					</a>
 				</h2>
-				<@.items div>
+				<@.poll.items.Seq div>
 					<&HTML($_)>
 				</@>
 			</!>
 		</div>
 		END
-	}
-
-	method vote(UInt() :$item) is accessible{ :http-method<PUT> } {
-		red-do :transaction, {
-			require ::("PollItem");
-			::("PollItem").^load($item).vote;
-			$!poll.votes.create: :$!user;
-		}
 	}
 }
 

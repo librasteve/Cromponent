@@ -19,8 +19,7 @@ my $routes = route {
 	PollVote.^create-table: :unless-exists;
 
 	template-location "resources/";
-	# Poll.^add-cromponent-routes;
-	PollView.^add-cromponent-routes;
+	PollItem.^add-cromponent-routes;
 
 	Poll.^create:
 	    :descr('test01'),
