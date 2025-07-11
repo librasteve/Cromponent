@@ -1,6 +1,8 @@
 Revision history for Cromponent
 
 {{$NEXT}}
+    - accept `is cookie`, `is query`, `is header`, `is auth`
+    - auto add websocket route
 
 0.0.13  2025-05-29T10:11:07+01:00
     - fixes bug on update

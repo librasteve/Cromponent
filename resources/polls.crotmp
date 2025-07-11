@@ -1,15 +1,18 @@
 <:use Boilerplate>
+<:use WebSocket>
 
 <|Boilerplate(
 	:title('Poll'),
 	:htmx,
-	:style-sheets('css')
+	:style-sheets('/css')
 )>
-	<h6>logged in as <.user></h6>
-	<hr>
-	<@.polls>
-		<&HTML($_)>
-	</@>
-	<hr>
-	<a href="/polls">all polls</a>
+	<|WebSocket>
+		<h6>logged in as <.user></h6>
+		<hr>
+		<@.polls>
+			<&HTML($_)>
+		</@>
+		<hr>
+		<a href="/polls">all polls</a>
+	</|>
 </|>

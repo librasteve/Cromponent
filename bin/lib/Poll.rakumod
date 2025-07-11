@@ -7,10 +7,16 @@ model Poll does Cromponent {
 	has      @.items is relationship(*.poll-id, :model<PollItem>);
 	has      @.votes is relationship(*.poll-id, :model<PollVote>);
 
-	method LOAD(Int $poll-id) {
-		Poll.^load: $poll-id
-	}
+	# How to load the component
+	method LOAD(Int $poll-id) { Poll.^load: $poll-id }
 
+	# Unique dentifier passed by websocket. Used on LOAD
+	method IDS { $!id }
+
+	# How to redraw the component when asked by websocket
+	method REDRAW(:$*user! is cookie) { $.Str }
+
+	# List of items from poll sorted
 	method sorted-items {
 		@!items.sort: {
 			|(-.votes if $.did-user-vote),
@@ -18,9 +24,10 @@ model Poll does Cromponent {
 		}
 	}
 
+	# Cro template to be rendered
 	method RENDER {
 		Q:to/END/;
-		<div class="poll">
+		<div class="poll" id="poll-<.id>">
 			<h2>
 				<a href="/polls/<.id>">
 					<.descr> (<.votes.elems> vote<?{ .votes.elems != 1 }>s</?>)
@@ -35,9 +42,10 @@ model Poll does Cromponent {
 		END
 	}
 
+	# Uses dyn variable to decided if the current user has already voted
 	method did-user-vote($user = $*user) {
 		?@.votes.first: *.user eq $user
 	}
 }
 
-sub EXPORT() { Poll.^exports }
+sub EXPORT { Poll.^exports }

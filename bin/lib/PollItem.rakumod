@@ -50,6 +50,7 @@ model PollItem does Cromponent {
 			$!votes++;
 			self.^save;
 			$!poll.votes.create: :$*user;
+			redraw $!poll;
 			$!poll
 		}
 	}

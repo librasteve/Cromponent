@@ -11,27 +11,29 @@ unit role Cromponent;
 
 ::?CLASS.HOW does Cromponent::MetaCromponentRole;
 
-method custom-transformation($html) {
-	$html
-}
-
 my $name = ::?CLASS.^name;
 my Str $compiled = ::?CLASS.&compile-cromponent;
 my &compiled = comp $compiled, $name;
 use Cro::WebApp::Template::Repository;
 
+has @.children is built;
+
 ::?CLASS.^add_method: "Str", my method (|c) {
-	my %*WARNINGS;
-	my $*TEMPLATE-REPOSITORY = get-template-repository;
+	.push: self with @*CROMPONENTS;
+	{
+		my %*WARNINGS;
+		my $*TEMPLATE-REPOSITORY = get-template-repository;
+		my @*CROMPONENTS := @!children with self;
 
-	my $resp = compiled.(self, |c);
+		my $resp = compiled.(self, |c);
 
-	if %*WARNINGS {
-		for %*WARNINGS.kv -> $text, $number {
-			warn "$text ($number time{ $number == 1 ?? '' !! 's' })";
+		if %*WARNINGS {
+			for %*WARNINGS.kv -> $text, $number {
+				warn "$text ($number time{ $number == 1 ?? '' !! 's' })";
+			}
 		}
+		return $resp
 	}
-	return $resp
 }
 
 =begin pod

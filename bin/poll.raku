@@ -7,6 +7,7 @@ use Cro::WebApp::Template;
 use Poll;
 use PollItem;
 use PollVote;
+use WebSocket;
 use Red:api<2>;
 use UUID;
 
@@ -19,6 +20,7 @@ my $routes = route {
 
 	template-location "resources/";
 	PollItem.^add-cromponent-routes;
+	WebSocket.^add-cromponent-routes;
 
 	Poll.^create:
 	    :descr('What is your favourite Raku feature?'),
@@ -56,9 +58,9 @@ my $routes = route {
 
 	get -> 'polls', UInt $id, Str :$*user is cookie = UUID.new.Str {
 		response.set-cookie: "user", $*user;
+		my $polls = Poll.LOAD: $id;
 		template "polls.crotmp", {
-			user  => $*user,
-			polls => Poll.LOAD: $id
+			:$*user, :$polls
 		}
 	}
 

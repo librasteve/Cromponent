@@ -112,6 +112,8 @@ method add-cromponent-routes(
 	}
 	my $route-set := $*CRO-ROUTE-SET;
 
+	$component.?EXTRA-ENDPOINTS;
+
 	for @.list-loads: $component, &load -> &load {
 		my $load-sig  = $.load-sig: &load;
 		my $call-pars = $.call-pars: &load;
@@ -221,14 +223,22 @@ method exports(Mu:U $class) {
 		Map.new: (
 			'&__TEMPLATE_MACRO__' ~ $name => sub (&body, |c) {
 				my $obj = $class.new: |c;
-				$obj.custom-transformation: compiled.(&body, $obj)
+				.push: $obj with @*CROMPONENTS;
+				{
+					my @*CROMPONENTS := $obj.children[];
+					compiled.(&body, $obj);
+				}
 			}
 		)
 	} else {
 		Map.new: (
 			'&__TEMPLATE_SUB__' ~ $name => sub (|c) {
 				my $obj = $class.new: |c;
-				$obj.custom-transformation: compiled.($obj)
+				.push: $obj with @*CROMPONENTS;
+				{
+					my @*CROMPONENTS := $obj.children[];
+					compiled.($obj);
+				}
 			}
 		)
 	}
