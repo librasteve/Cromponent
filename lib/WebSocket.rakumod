@@ -43,9 +43,27 @@ class WebSocket does Cromponent is macro {
 
   my SetHash %conn{Tuple};
 
-  sub redraw(Cromponent $obj) is export {
-    my Tuple $tuple .= new: [ $obj.^name, |$obj.IDS ];
+  subset CromponentWithIds of Cromponent where { .^can: "IDS" }
+
+  multi redraw(CromponentWithIds $obj) is export {
+    redraw $obj.WHAT, [ |$obj.IDS, ]
+  }
+
+  multi redraw(Cromponent:U $class, @ids) is export {
+    redraw $class.^name, @ids
+  }
+
+  multi redraw(Str $class, @ids) is export {
+    my Tuple $tuple .= new: [ $class, |@ids ];
     .emit: $tuple for %conn{ $tuple }.keys
+  }
+
+  sub dyn-load(Str $type) {
+    state Any:U %cache;
+    return %cache{$type} if %cache{$type}:exists;
+
+    require ::($type);
+    %cache{$type} = ::($type);
   }
 
   method EXTRA-ENDPOINTS {
@@ -91,26 +109,46 @@ class WebSocket does Cromponent is macro {
             whenever $close { del-conn }
 
             whenever $supplier.Supply -> ($type, *@params) {
-              require ::($type);
-              my &LOAD = ::($type).^find_method: "LOAD";
+              my &LOAD = $type.&dyn-load.^find_method: "LOAD";
 
               my sub get-data(*@params --> Map()) {
-                my :(:@cookie, :@query, :@header, :@auth, |) := @params.classify: { .?trait-used // "" };
+                my :(:@scalar, :@hash) := @params.classify: { .sigil eq '%' ?? "hash" !! "scalar" };
 
-                @cookie .= map: { |.named_names };
-                @query  .= map: { |.named_names };
-                @header .= map: { |.named_names };
-                @auth   .= map: { |.named_names };
+                my %scalar := do {
+                  my :(:@cookie, :@query, :@header, :@auth, |) := @scalar.classify: { .?trait-used // "" };
 
-                Map.new: (
-                  |(@cookie Z=> %COOKIES{ @cookie } if @cookie),
-                  |(@query  Z=> %QUERIES{ @query  } if @query ),
-                  |(@header Z=> %HEADERS{ @header } if @header),
-                )
+                  @cookie .= map: { |.named_names };
+                  @query  .= map: { |.named_names };
+                  @header .= map: { |.named_names };
+                  @auth   .= map: { |.named_names };
+
+                  Map.new: (
+                    |(@cookie Z=> %COOKIES{ @cookie } if @cookie),
+                    |(@query  Z=> %QUERIES{ @query  } if @query ),
+                    |(@header Z=> %HEADERS{ @header } if @header),
+                  )
+                }
+
+                my %hash := do {
+                  my :(:@cookie, :@query, :@header, :@auth, |) := @hash.classify: { .?trait-used // "" };
+
+                  @cookie .= map: { |.named_names };
+                  @query  .= map: { |.named_names };
+                  @header .= map: { |.named_names };
+                  @auth   .= map: { |.named_names };
+
+                  Map.new: (
+                    |(@cookie => %COOKIES if @cookie),
+                    |(@query  => %QUERIES if @query ),
+                    |(@header => %HEADERS if @header),
+                  )
+                }
+
+                Map.new: (|%scalar, |%hash);
               }
 
               my %map := Map.new: get-data &LOAD.signature.params;
-              my $obj = LOAD ::($type), |@params, |%map;
+              my $obj = LOAD $type.&dyn-load, |@params, |%map;
 
               with $obj.^find_method: "REDRAW" {
                 my %map := Map.new: get-data .signature.params;
