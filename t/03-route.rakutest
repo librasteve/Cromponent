@@ -346,7 +346,7 @@ subtest {
 		method RENDER        { "html: <.id> <.bool> <.value>" }
 		method without-args is accessible { $!bool = !$!bool }
 		method with-args-get(Str :$value) is accessible { $!value = $value }
-		method with-args-put(Str :$value, |c) is accessible{ :http-method<PUT> } { note c; $!value = $value }
+		method with-args-put(Str :$value, |c) is accessible{ :http-method<PUT> } { $!value = $value }
 	}
 
 	test-service route({ D.^add-cromponent-routes }), {

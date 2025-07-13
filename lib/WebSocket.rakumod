@@ -126,6 +126,7 @@ class WebSocket does Cromponent is macro {
                     |(@cookie Z=> %COOKIES{ @cookie } if @cookie),
                     |(@query  Z=> %QUERIES{ @query  } if @query ),
                     |(@header Z=> %HEADERS{ @header } if @header),
+                    |(@auth   Z=> %AUTHS{   @auth   } if @auth  ),
                   )
                 }
 
@@ -138,9 +139,10 @@ class WebSocket does Cromponent is macro {
                   @auth   .= map: { |.named_names };
 
                   Map.new: (
-                    |(@cookie => %COOKIES if @cookie),
-                    |(@query  => %QUERIES if @query ),
-                    |(@header => %HEADERS if @header),
+                    |($_ => %COOKIES for @cookie),
+                    |($_ => %QUERIES for @query ),
+                    |($_ => %HEADERS for @header),
+                    |($_ => %AUTHS   for @auth  ),
                   )
                 }
 
