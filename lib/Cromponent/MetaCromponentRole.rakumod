@@ -89,6 +89,7 @@ method add-cromponent-routes(
 			}
 		}
 
+##### FIXME CROMPONENT MetaCromponentRole.rakumod LINE 97 ####
 		with &update {
 			note "adding PUT $url-part$path";
 			put ("-> '$url-part', " ~ q[$id {
@@ -96,6 +97,9 @@ method add-cromponent-routes(
 					my $updated = update $id, |$data.pairs.Map;
 					if $updated.^roles.map(*.^name).first: "Cromponent" {
 						return content $updated.Str
+					}
+					if $updated.^roles.map(*.^name).first: "Component" {
+						content 'text/html', $updated.HTML
 					}
 					$updated
 				}
