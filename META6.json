@@ -9,7 +9,7 @@
     "depends": [
         "Cro::WebApp::Template",
         "Cro::HTTP::Router",
-        "Cro::HTTP::WebSocket",
+        "Cro::HTTP::Router::WebSocket",
         "CSS::Nested",
         "CSS::Writer",
         "UUID",
