@@ -8,7 +8,10 @@
     "auth": "zef:FCO",
     "depends": [
         "Cro::WebApp::Template",
+        "Cro::HTTP::Router",
+        "Cro::HTTP::WebSocket",
         "CSS::Nested",
+        "CSS::Writer",
         "UUID",
         "UUID::V4",
         "Tuple"
