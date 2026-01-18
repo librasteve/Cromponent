@@ -1,2 +1,5 @@
 .precomp/
 /Cromponent-*
+/Cromponent.iml
+/.idea/modules.xml
+/.idea/vcs.xml
